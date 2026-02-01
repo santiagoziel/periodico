@@ -1,6 +1,6 @@
-import { SourceName } from "../constants";
-import { ArticleIdentifier, ArticleTitle, RawArticlePayload } from "../entities";
-import { AttemptToFetch } from "../functors";
+import { SourceName } from "../symbols/constants";
+import { ArticleIdentifier, ArticleTitle, RawArticlePayload } from "../symbols/entities";
+import { AttemptToFetch } from "../symbols/functors";
         
 export interface NewsSource {
     name: SourceName;

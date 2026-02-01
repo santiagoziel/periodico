@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "npx ts-node main.ts",
+    "start": "npx ts-node src/main.ts",
     "test": "npx ts-node sandbox/prototype/embedding.ts"
   },
   "dependencies": {

@@ -17,7 +17,7 @@ export const errorWithContext = <E extends object = object>(context: string, gen
     }
   };
 
- export const theParsedErrorFrom = <E extends object = object>(error: GeneralError<E>, logger: (error: object) => void): string => {
+ export const theParsedErrorFromThe = <E extends object = object>(error: GeneralError<E>, logger: (error: object) => void): string => {
     if (weDontKnowWhatHappenedInThe(error)) {
       logger(error.error);
       const errorMessage = error.details ?? "Unknown error";
