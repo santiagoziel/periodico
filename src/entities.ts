@@ -1,4 +1,4 @@
-export type SourceName = "intoleranciadiario" | "sintesis" | "pueblaonline";
+import { SourceName } from "./constants";
 
 export type ArticleTitle = {
     url: string,

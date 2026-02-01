@@ -1,0 +1,1 @@
+export type SourceName = "intoleranciadiario" | "sintesis" | "pueblaonline";
