@@ -1,7 +1,9 @@
 import { SourceName } from "../constants";
-import { ArticleTitle } from "../entities";
-
+import { ArticleIdentifier, ArticleTitle, RawArticlePayload } from "../entities";
+import { AttemptToFetch } from "../functors";
+        
 export interface NewsSource {
     name: SourceName;
-    getTitles(): Promise<ArticleTitle[]>
+    getTitles(): AttemptToFetch<{titles: ArticleTitle[]}>
+    fetchArticle(articleInfo: ArticleIdentifier): AttemptToFetch<RawArticlePayload>
 }

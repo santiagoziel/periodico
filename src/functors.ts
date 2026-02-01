@@ -1,7 +1,9 @@
+import { GeneralError } from "./error-models"
+
 export type Success<A extends object> = {is: "Successful" } & A
 export type Failure<B extends object> = {is: "Failed" } & B
 export type Attempt<A extends object,B extends object> = Success<A> | Failure<B>
-export type PromiseToAttempt<A extends object,B extends object> = Promise<Attempt<A, B>>
+export type AttemptToFetch<A extends object> = Promise<Attempt<A, GeneralError>>
 
 export type Unit = {}
 
@@ -22,7 +24,7 @@ export const payloadFromTheSuccessful = <A extends object>(v: Success<A>): A => 
 };
 
 //Kleisli categorical composition
-export const tryTo = <A extends object, B extends object, E extends object, R extends Attempt<B, E> | PromiseToAttempt<B, E>>
+export const tryTo = <A extends object, B extends object, E extends object, R extends Attempt<B, E> | Promise<Attempt<B, E>>>
 (f: (x: A) => R, attempt: Attempt<A, E>): R => 
     (failedThe(attempt) ? attempt : f(payloadFromTheSuccessful(attempt))) as R;
 
@@ -30,7 +32,7 @@ export const lifted = <A extends object, B extends object>
 (f: (x: A) => B): (a: A) => Success<B> =>
   (a: A): Success<B> => success(f(a));
 
-export const tryToRun = <A extends object, B extends object, E extends object, R extends Attempt<B, E> | PromiseToAttempt<B, E>>
+export const tryToRun = <A extends object, B extends object, E extends object, R extends Attempt<B, E> | Promise<Attempt<B, E>>>
 (f: (x: A) => B, attempt: Attempt<A, E>): R => 
     tryTo(lifted(f), attempt) as R;
 
