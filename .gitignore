@@ -1,0 +1,8 @@
+*
+
+# But not these files/folders
+!.gitignore
+!package.json
+!tsconfig.json
+!src/
+!src/**

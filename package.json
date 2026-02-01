@@ -1,0 +1,27 @@
+{
+  "name": "periodico",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx ts-node main.ts",
+    "test": "npx ts-node sandbox/prototype/embedding.ts"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.18.0",
+    "cheerio": "^1.0.0",
+    "docx": "^9.5.1",
+    "dotenv": "^17.2.3",
+    "googleapis": "^170.0.0",
+    "openai": "^6.16.0",
+    "playwright": "^1.58.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}
