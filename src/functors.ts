@@ -33,3 +33,19 @@ export const lifted = <A extends object, B extends object>
 export const tryToRun = <A extends object, B extends object, E extends object, R extends Attempt<B, E> | PromiseToAttempt<B, E>>
 (f: (x: A) => B, attempt: Attempt<A, E>): R => 
     tryTo(lifted(f), attempt) as R;
+
+export const reframeTheFailed = <A extends object, E extends object, F extends object>
+(attempt: Attempt<A, E>, f: (e: E) => F): Attempt<A, F> =>
+    succeededInThe(attempt) ? attempt : failure(f(payloadFromTheFailed(attempt)));
+
+export const resolveThe = <A extends object, E extends object, R>
+(attempt: Attempt<A, E>, onSuccess: (a: A) => R, onFailure: (e: E) => R): R =>
+    succeededInThe(attempt) 
+        ? onSuccess(payloadFromTheSuccessful(attempt)) 
+        : onFailure(payloadFromTheFailed(attempt));
+
+export const buildSuccessPayloadFrom = <A extends object, E extends object>
+(attempt: Attempt<A, E>, fromFailure: (e: E) => A): A =>
+    succeededInThe(attempt) 
+        ? payloadFromTheSuccessful(attempt) 
+        : fromFailure(payloadFromTheFailed(attempt));
