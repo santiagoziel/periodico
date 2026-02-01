@@ -1,1 +1,1 @@
-export type SourceName = "intoleranciadiario" | "sintesis" | "pueblaonline" | "dummy";
+export type SourceName = "intoleranciadiario" | "sintesis" | "pueblaonline" | "dummy" | "dummy2";
