@@ -5,7 +5,7 @@ export type ArticleTitle = {
     title: string
 }
 
-export type ArticlesInfo = Record<SourceName, ArticleTitle>
+export type ArticlesInfo = Partial<Record<SourceName, ArticleTitle[]>>
 
 export type UniqueTitle = {
     source: SourceName,
