@@ -12,6 +12,9 @@ export type UniqueTitle = {
     title: string
 }
 
+export type PonderedTitle = {embedding: number[], title: UniqueTitle}
+export type PonderedTitles = PonderedTitle[]
+
 export type TitleGroup = UniqueTitle[]
 
 export type EmbeddedArticleTitles = {
