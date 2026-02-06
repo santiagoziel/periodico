@@ -1,4 +1,4 @@
-export type SourceName = "intoleranciadiario" | "sintesis" | "pueblaonline" | "dummy" | "dummy2";
+export type SourceName = "intoleranciadiario" | "sintesis" | "pueblaonline" | "dummy" | "dummy2" | "dummy3";
 
-export const MAIN_THRESHOLD = 0.9
-export const SECONDARY_THRESHOLD = 0.8
+export const MAIN_THRESHOLD = 0.62
+export const SECONDARY_THRESHOLD = 0.6

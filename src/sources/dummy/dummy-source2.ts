@@ -6,11 +6,15 @@ import { NewsSource } from "../source-interface"
 export const dummySource2: NewsSource = {
     name: "dummy2",
     getTitles: async () => {
-        //return failure(knownError("No titles found", {payload: "test error"}))
-        return success({titles: [{url: "https://www.google.com", title: "Google2"}, {url: "https://www.facebook.com", title: "Facebook2"}]})
+        return success({titles: [
+            {url: "https://example.com/news/5", title: "Fuerte sismo de 6.5 grados afecta región costera de Oaxaca"},
+            {url: "https://example.com/news/6", title: "Lluvias intensas provocan inundaciones en Tabasco"},
+            {url: "https://example.com/news/7", title: "México derrota a USA con marcador de 3 a 1 en encuentro de fútbol"},
+            {url: "https://example.com/news/8", title: "Científicos mexicanos descubren nueva especie de mariposa"},
+        ]})
     },
 
     fetchArticle: async (articleInfo: ArticleIdentifier) => {
-        return success({facts: "Google is a search engine", url: articleInfo.url})
+        return success({facts: "Contenido del artículo de noticias", url: articleInfo.url})
     }
 }

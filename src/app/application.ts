@@ -1,3 +1,4 @@
+import { Agent } from "../agent/agent";
 import { NewsSource } from "../sources/source-interface";
 import { SourceName } from "../symbols/constants";
 import { ArticlesInfo, ArticleTitle, UniqueTitle } from "../symbols/entities";
@@ -6,7 +7,11 @@ import { failedThe, resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
 
 export class Application {
-    constructor(private readonly sources: NewsSource[], private readonly dsl: DSL) {}
+    constructor(
+        private readonly sources: NewsSource[], 
+        private readonly dsl: DSL,
+        private readonly agent: Agent
+    ) {}
 
     private fetchArticles = async () => {
         const articlesInfo: ArticlesInfo = {};
@@ -29,6 +34,7 @@ export class Application {
      run = async () => {
         const articlesInfo = await this.fetchArticles()
         const uniqueTitles = this.groupArticles(articlesInfo)
-        return uniqueTitles
+        const articleGroups = await this.agent.embedArticles(uniqueTitles)
+        return articleGroups
     }
 }
