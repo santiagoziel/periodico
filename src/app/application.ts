@@ -71,11 +71,13 @@ export class Application {
     }
 
     private buildFileUpload = async (articlesInfo: ArticlesInfo, articleGroups: EmbeddedArticleTitles): Promise<ProcessArticleInput[]> =>{
-        const {union, single} = articleGroups
+        const unionUploadPayloads = 
+            await Promise.all(
+                articleGroups.union.map(async (articleGroup) => this.formatUnionArticleGroup(articleGroup, articlesInfo)
+            ))
 
-        const unionUploadPayloads = await Promise.all(union.map(async (articleGroup) => this.formatUnionArticleGroup(articleGroup, articlesInfo)))
-
-        const singleUploadPayloads = await this.formatSingleArticleGroup(single, articlesInfo)
+        const singleUploadPayloads = 
+            await this.formatSingleArticleGroup(articleGroups.single, articlesInfo)
 
         return [...unionUploadPayloads, ...singleUploadPayloads]
     }

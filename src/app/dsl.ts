@@ -58,8 +58,8 @@ export class DSL {
         return {
             type: "union", 
             facts,
-             urls, 
-             ...(relevantPersons.length > 0 ? relevantPersons : undefined)
+            urls, 
+            ...(relevantPersons.length > 0 ? relevantPersons : undefined)
         }
     }
 
