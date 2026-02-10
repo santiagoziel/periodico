@@ -1,9 +1,7 @@
 import { Agent } from "../agent/agent";
 import { NewsSource } from "../sources/source-interface";
-import { SourceName } from "../symbols/constants";
-import { ArticlesInfo, ArticleTitle, UniqueTitle } from "../symbols/entities";
-import { errorWithContext, GeneralError, theParsedErrorFromThe } from "../symbols/error-models";
-import { failedThe, resolveThe } from "../symbols/functors";
+import { ArticleIdentifier, ArticlesInfo, ArticleTitle, UniqueTitle } from "../symbols/entities";
+import { resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
 
 export class Application {
@@ -26,9 +24,13 @@ export class Application {
     }
 
     private groupArticles = (articlesInfo: ArticlesInfo): UniqueTitle[] => {
-        return (Object.entries(articlesInfo) as [SourceName, ArticleTitle[]][]).map(([sourceName, titles]) => {
+        return (Object.entries(articlesInfo) as [string, ArticleTitle[]][]).map(([sourceName, titles]) => {
             return titles.map(articleTitle => ({source: sourceName, title: articleTitle.title}))
         }).flat()
+    }
+
+    private buildFileUpload = () =>{
+        
     }
     
      run = async () => {
