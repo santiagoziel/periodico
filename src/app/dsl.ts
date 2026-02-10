@@ -1,4 +1,4 @@
-import { ArticleIdentifier, ArticleTitle, ArticlesInfo, UniqueTitle } from "../symbols/entities"
+import { ArticleIdentifier, ArticleTitle, ArticlesInfo, ProcessArticleInput, ProcessSingleArticleInput, ProcessUnionArticleInput, RawArticlePayload, UnionArticlePayload, UniqueTitle } from "../symbols/entities"
 import { GeneralError, theParsedErrorFromThe, errorWithContext } from "../symbols/error-models"
 
 export class DSL {
@@ -32,7 +32,7 @@ export class DSL {
         articlesInfo[name] = titles
     }
 
-    buildFetchInput = (articleInfo: ArticlesInfo, title: UniqueTitle): ArticleIdentifier => {
+    buildArticleId = (articleInfo: ArticlesInfo, title: UniqueTitle): ArticleIdentifier => {
         const sourceArticles = articleInfo[title.source]
         const sourceArticle = sourceArticles.find(article => article.title === title.title)
         if (!sourceArticle) {
@@ -44,4 +44,24 @@ export class DSL {
             url: sourceArticle.url
         }
     }
+
+    buildUnionUploadPayload = (rawPayloads: UnionArticlePayload): ProcessUnionArticleInput => {
+        const facts = rawPayloads.map(payload => payload.facts)
+        const urls = rawPayloads.map(payload => payload.url)
+        const relevantPersons = rawPayloads.flatMap(payload => payload.relevantPersons ?? [])
+        return {
+            type: "union", 
+            facts,
+             urls, 
+             ...(relevantPersons.length > 0 ? relevantPersons : undefined)
+        }
+    }
+
+    buildSingleUploadPayload = (rawPayload: RawArticlePayload): ProcessSingleArticleInput => {
+        return {
+            type: "single",
+            ...rawPayload
+        }
+    }
+
 }

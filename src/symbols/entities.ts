@@ -1,3 +1,6 @@
+import { GeneralError } from "./error-models"
+import { Attempt } from "./functors"
+
 export type ArticleTitle = {
     url: string,
     title: string
@@ -23,7 +26,7 @@ export type EmbeddedArticleTitles = {
 }
 
 export type ArticleIdentifier = {
-    source: string;
+    source: SourceName;
     title: string;
     url: string;
   };
@@ -33,6 +36,8 @@ export type RawArticlePayload = {
     url: string, //just to attach at the end, the call has been made already
     relevantPersons?: string[]
 }
+
+export type FetchArticleAttempt = Attempt<RawArticlePayload, GeneralError>
 
 export type UnionArticlePayload = RawArticlePayload[]
 

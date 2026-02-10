@@ -6,14 +6,14 @@ export const dummySource3: NewsSource = {
     name: "dummy3",
     getTitles: async () => {
         return success({titles: [
-            {url: "https://example.com/news/9", title: "Sismo de gran magnitud registrado en las costas oaxaqueñas"},
-            {url: "https://example.com/news/10", title: "La moneda mexicana se fortalece frente al dólar estadounidense"},
-            {url: "https://example.com/news/11", title: "Triunfo del Tri: México gana 3-1 contra la selección americana"},
-            {url: "https://example.com/news/12", title: "Crisis de agua potable afecta a colonias del norte de Monterrey"},
+            {url: "https://dummy3.com/news/9", title: "Sismo de gran magnitud registrado en las costas oaxaqueñas"},
+            {url: "https://dummy3.com/news/10", title: "La moneda mexicana se fortalece frente al dólar estadounidense"},
+            {url: "https://dummy3.com/news/11", title: "Triunfo del Tri: México gana 3-1 contra la selección americana"},
+            {url: "https://dummy3.com/news/12", title: "Crisis de agua potable afecta a colonias del norte de Monterrey"},
         ]})
     },
 
     fetchArticle: async (articleInfo: ArticleIdentifier) => {
-        return success({facts: "Contenido del artículo de noticias", url: articleInfo.url})
+        return success({facts: `Contenido del artículo ${articleInfo.title} for source ${articleInfo.source}`, url: articleInfo.url})
     }
 }
