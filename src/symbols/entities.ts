@@ -1,16 +1,19 @@
-import { SourceName } from "./constants";
-
 export type ArticleTitle = {
     url: string,
     title: string
 }
 
-export type ArticlesInfo = Partial<Record<SourceName, ArticleTitle[]>>
+export type SourceName = string
+
+export type ArticlesInfo = Record<SourceName, ArticleTitle[]>
 
 export type UniqueTitle = {
-    source: SourceName,
+    source: string,
     title: string
 }
+
+export type PonderedTitle = {embedding: number[], title: UniqueTitle}
+export type PonderedTitles = PonderedTitle[]
 
 export type TitleGroup = UniqueTitle[]
 
@@ -20,7 +23,7 @@ export type EmbeddedArticleTitles = {
 }
 
 export type ArticleIdentifier = {
-    source: SourceName;
+    source: string;
     title: string;
     url: string;
   };
