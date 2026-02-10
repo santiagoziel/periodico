@@ -33,9 +33,9 @@ export class DSL {
     }
 
     flattenArticles = (articlesInfo: ArticlesInfo): UniqueTitle[] => {
-        return (Object.entries(articlesInfo) as [string, ArticleTitle[]][]).map(([sourceName, titles]) => {
-            return titles.map(articleTitle => ({source: sourceName, title: articleTitle.title}))
-        }).flat()
+        return (Object.entries(articlesInfo) as [string, ArticleTitle[]][]).map(([sourceName, titles]) => 
+            titles.map(articleTitle => ({source: sourceName, title: articleTitle.title}))
+        ).flat()
     }
 
     buildArticleId = (articleInfo: ArticlesInfo, title: UniqueTitle): ArticleIdentifier => {
@@ -58,8 +58,8 @@ export class DSL {
         return {
             type: "union", 
             facts,
-             urls, 
-             ...(relevantPersons.length > 0 ? relevantPersons : undefined)
+            urls, 
+            ...(relevantPersons.length > 0 ? relevantPersons : undefined)
         }
     }
 

@@ -1,7 +1,7 @@
 import { Agent } from "../agent/agent";
 import { NewsSource } from "../sources/source-interface";
-import { ArticleIdentifier, ArticlesInfo, ArticleTitle, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, ProcessSingleArticleInput, ProcessUnionArticleInput, RawArticlePayload, TitleGroup, UnionArticlePayload, UniqueTitle } from "../symbols/entities";
-import { GeneralError, knownError, unknownError } from "../symbols/error-models";
+import { ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, RawArticlePayload, TitleGroup, UnionArticlePayload } from "../symbols/entities";
+import { GeneralError, knownError } from "../symbols/error-models";
 import { AttemptToFetch, failure, resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
 
@@ -46,13 +46,11 @@ export class Application {
     private formatUnionArticleGroup = async (articleGroup: TitleGroup, articlesInfo: ArticlesInfo) => {
         const articlesIds = articleGroup.map((articleTitle) => this.dsl.buildArticleId(articlesInfo, articleTitle))
 
-        const rawArticleAttempts = await Promise.all(articlesIds.map(async (articleIdentifier) => {
-            return this.fetchArticle(articleIdentifier)
-        }))
+        const rawArticleAttempts = await Promise.all(articlesIds.map(async (articleIdentifier) => this.fetchArticle(articleIdentifier)))
         
-        const rawArticlesPayloads: UnionArticlePayload = rawArticleAttempts.reduce<UnionArticlePayload>((acc, payloadAttempt) =>{
+        const rawArticlesPayloads: UnionArticlePayload = rawArticleAttempts.reduce<UnionArticlePayload>((acc, payloadAttempt) => {
             this.sortFetchAttempt(payloadAttempt, acc)
-                return acc
+            return acc
         }, [])
 
         return this.dsl.buildUnionUploadPayload(rawArticlesPayloads)
@@ -61,7 +59,7 @@ export class Application {
     private formatSingleArticleGroup = async (articleGroup: TitleGroup, articlesInfo: ArticlesInfo)=> {
         const singleFetchAttempts = await Promise.all(articleGroup.map(async (uniqueTitle) => {
             const articleIdentifier = this.dsl.buildArticleId(articlesInfo, uniqueTitle)
-             return this.fetchArticle(articleIdentifier)
+            return this.fetchArticle(articleIdentifier)
         }))
 
         const singleRawPayloads = singleFetchAttempts.reduce<RawArticlePayload[]>((acc, fetchAttempt) => {
@@ -73,13 +71,13 @@ export class Application {
     }
 
     private buildFileUpload = async (articlesInfo: ArticlesInfo, articleGroups: EmbeddedArticleTitles): Promise<ProcessArticleInput[]> =>{
-        const {union, single} = articleGroups
+        const unionUploadPayloads = 
+            await Promise.all(
+                articleGroups.union.map(async (articleGroup) => this.formatUnionArticleGroup(articleGroup, articlesInfo)
+            ))
 
-        const unionUploadPayloads = await Promise.all(union.map(async (articleGroup) => {
-            return this.formatUnionArticleGroup(articleGroup, articlesInfo)
-        }))
-
-        const singleUploadPayloads = await this.formatSingleArticleGroup(single, articlesInfo)
+        const singleUploadPayloads = 
+            await this.formatSingleArticleGroup(articleGroups.single, articlesInfo)
 
         return [...unionUploadPayloads, ...singleUploadPayloads]
     }
