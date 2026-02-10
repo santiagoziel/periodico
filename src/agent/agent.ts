@@ -14,6 +14,7 @@ export class Agent {
         return response.data.map(d => d.embedding)
     }
 
+    //https://en.wikipedia.org/wiki/Cosine_similarity
     private cosineSimilarity = (a: number[], b: number[]): number => {
         let dot = 0;
         let normA = 0;

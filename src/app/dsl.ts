@@ -33,9 +33,9 @@ export class DSL {
     }
 
     flattenArticles = (articlesInfo: ArticlesInfo): UniqueTitle[] => {
-        return (Object.entries(articlesInfo) as [string, ArticleTitle[]][]).map(([sourceName, titles]) => {
-            return titles.map(articleTitle => ({source: sourceName, title: articleTitle.title}))
-        }).flat()
+        return (Object.entries(articlesInfo) as [string, ArticleTitle[]][]).map(([sourceName, titles]) => 
+            titles.map(articleTitle => ({source: sourceName, title: articleTitle.title}))
+        ).flat()
     }
 
     buildArticleId = (articleInfo: ArticlesInfo, title: UniqueTitle): ArticleIdentifier => {
