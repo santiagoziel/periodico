@@ -28,7 +28,7 @@ export class Agent {
         return dot / (Math.sqrt(normA) * Math.sqrt(normB));
       }
 
-    embedArticles = async (articles: UniqueTitle[]): Promise<EmbeddedArticleTitles> => {
+    groupArticles = async (articles: UniqueTitle[]): Promise<EmbeddedArticleTitles> => {
         const embeddings = await this.getEmbeddings(articles.map(article => article.title))
 
         const PonderedTitles: PonderedTitles = []
