@@ -8,7 +8,7 @@ export class Cloud {
     constructor(private readonly agent: Agent) {}
 
     private uploadSingleFile = async (uploadArticleInput: ProcessSingleArticleInput) => {
-        const { facts, url, relevantPersons } = uploadArticleInput
+        const { content: facts, url, relevantPersons } = uploadArticleInput
 
 
         const suggestTitleAttempt = await this.agent.suggestTitle(facts)

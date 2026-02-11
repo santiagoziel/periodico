@@ -84,7 +84,7 @@ export class Application {
 
      run = async () => {
         const articlesInfo = await this.fetchArticleUrls()
-        const uniqueTitles = this.dsl.flattenArticles(articlesInfo)
+        const uniqueTitles = this.dsl.flattenArticleTitles(articlesInfo)
         const articleGroups = await this.agent.groupArticles(uniqueTitles)
         const fileUploadsInput = await this.buildFileUpload(articlesInfo, articleGroups)
         return fileUploadsInput

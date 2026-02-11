@@ -32,7 +32,7 @@ export class DSL {
         articlesInfo[name] = titles
     }
 
-    flattenArticles = (articlesInfo: ArticlesInfo): UniqueTitle[] => {
+    flattenArticleTitles = (articlesInfo: ArticlesInfo): UniqueTitle[] => {
         return (Object.entries(articlesInfo) as [string, ArticleTitle[]][]).map(([sourceName, titles]) => 
             titles.map(articleTitle => ({source: sourceName, title: articleTitle.title}))
         ).flat()
@@ -52,12 +52,12 @@ export class DSL {
     }
 
     buildUnionUploadPayload = (rawPayloads: UnionArticlePayload): ProcessUnionArticleInput => {
-        const facts = rawPayloads.map(payload => payload.facts)
+        const facts = rawPayloads.map(payload => payload.content)
         const urls = rawPayloads.map(payload => payload.url)
         const relevantPersons = rawPayloads.flatMap(payload => payload.relevantPersons ?? [])
         return {
             type: "union", 
-            facts,
+            contents: facts,
             urls, 
             ...(relevantPersons.length > 0 ? relevantPersons : undefined)
         }
