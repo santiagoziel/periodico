@@ -2,6 +2,8 @@ import { OpenAI } from "openai";
 import { EmbeddedArticleTitles, PonderedTitles, TitleGroup, UniqueTitle } from "../symbols/entities";
 import "dotenv/config"
 import { MAIN_THRESHOLD, SECONDARY_THRESHOLD } from "../symbols/constants";
+import { AttemptToFetch, failure, resolveThe, success } from "../symbols/functors";
+import { knownError } from "../symbols/error-models";
 
 export class Agent {
     private client = new OpenAI({apiKey: process.env.OPENAI_API_KEY})
@@ -94,4 +96,19 @@ export class Agent {
         }
             
     }
+
+    suggestTitle = async (facts: string): AttemptToFetch<{title: string}> => {
+        //TODO: standardize prompts usage
+        const response = await this.client.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{role: "user", content: `Suggest a title for the following facts: ${facts}`}],
+        })
+        const title = response.choices[0].message.content
+        if(!title) {
+            return failure(knownError(`No title suggested by the agent`))
+        }
+        return success({title})
+    }
+
+    
 }

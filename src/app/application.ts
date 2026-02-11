@@ -81,7 +81,7 @@ export class Application {
 
         return [...unionUploadPayloads, ...singleUploadPayloads]
     }
-    
+
      run = async () => {
         const articlesInfo = await this.fetchArticleUrls()
         const uniqueTitles = this.dsl.flattenArticles(articlesInfo)

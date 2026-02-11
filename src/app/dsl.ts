@@ -1,5 +1,5 @@
-import { ArticleIdentifier, ArticleTitle, ArticlesInfo, ProcessArticleInput, ProcessSingleArticleInput, ProcessUnionArticleInput, RawArticlePayload, UnionArticlePayload, UniqueTitle } from "../symbols/entities"
-import { GeneralError, theParsedErrorFromThe, errorWithContext } from "../symbols/error-models"
+import { ArticleIdentifier, ArticleTitle, ArticlesInfo, ProcessSingleArticleInput, ProcessUnionArticleInput, RawArticlePayload, UnionArticlePayload, UniqueTitle } from "../symbols/entities"
+import { GeneralError, errorWithContext, theParsedErrorFromThe } from "../symbols/error-models"
 
 export class DSL {
     logInfo = (x: object) => {
@@ -69,5 +69,4 @@ export class DSL {
             ...rawPayload
         }
     }
-
 }
