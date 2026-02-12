@@ -59,7 +59,7 @@ export class DSL {
             type: "union", 
             contents: facts,
             urls, 
-            ...(relevantPersons.length > 0 ? relevantPersons : undefined)
+            ...(relevantPersons.length > 0 ? { relevantPersons } : {})
         }
     }
 
