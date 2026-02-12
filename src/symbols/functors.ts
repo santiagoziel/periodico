@@ -32,9 +32,16 @@ export const lifted = <A extends object, B extends object>
 (f: (x: A) => B): (a: A) => Success<B> =>
   (a: A): Success<B> => success(f(a));
 
-export const tryToRun = <A extends object, B extends object, E extends object, R extends Attempt<B, E> | Promise<Attempt<B, E>>>
-(f: (x: A) => B, attempt: Attempt<A, E>): R => 
-    tryTo(lifted(f), attempt) as R;
+export const attemptTo = <A extends object, B extends object, E extends object>(
+    f: (x: A) => B | Promise<B>,
+    attempt: Attempt<A, E>
+): Attempt<B, E> | Promise<Attempt<B, E>> => {
+    const liftedOrAsync = (x: A) => {
+        const result = f(x);
+        return result instanceof Promise ? result.then(success) : success(result);
+    };
+    return tryTo(liftedOrAsync, attempt);
+};
 
 export const reframeTheFailed = <A extends object, E extends object, F extends object>
 (attempt: Attempt<A, E>, f: (e: E) => F): Attempt<A, F> =>

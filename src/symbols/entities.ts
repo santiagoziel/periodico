@@ -32,7 +32,7 @@ export type ArticleIdentifier = {
   };
 
 export type RawArticlePayload = {
-    facts: string,
+    content: string,
     url: string, //just to attach at the end, the call has been made already
     relevantPersons?: string[]
 }
@@ -43,22 +43,40 @@ export type UnionArticlePayload = RawArticlePayload[]
 
 export type ProcessSingleArticleInput = {
     type: "single",
-    facts: string,
+    content: string,
     url: string,
     relevantPersons?: string[]
 }
 
 export type ProcessUnionArticleInput = {
     type: "union",
-    facts: string[],
+    contents: string[],
     urls: string[],
     relevantPersons?: string[]
 }
 
 export type ProcessArticleInput = ProcessSingleArticleInput | ProcessUnionArticleInput
 
-export type ProcessedArticle = {
-    processedTile: string,
-    text: string,
-    personName?: string
+export type DraftArticle = {
+    facts: string[],
+    type: "single" | "union",
+    relevantPersons?: string[]
+    urlSection: string
+}
+
+export type NoteSections = {
+    title: string, 
+    note: string, 
+    urlSection: string, 
+    relevantPersons?: string[]
+}
+
+export type FinalDraftArticle = NoteSections & {
+    file: Buffer,
+}
+
+export type PublishReadyArticle = {
+    title: string,
+    file: Buffer,
+    filePath: string
 }

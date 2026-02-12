@@ -1,7 +1,10 @@
+import "dotenv/config";
 import { OpenAI } from "openai";
-import { EmbeddedArticleTitles, PonderedTitles, TitleGroup, UniqueTitle } from "../symbols/entities";
-import "dotenv/config"
 import { MAIN_THRESHOLD, SECONDARY_THRESHOLD } from "../symbols/constants";
+import { EmbeddedArticleTitles, PonderedTitles, UniqueTitle } from "../symbols/entities";
+import { knownError } from "../symbols/error-models";
+import { AttemptToFetch, failure, success } from "../symbols/functors";
+import { Prompts } from "./prompts";
 
 export class Agent {
     private client = new OpenAI({apiKey: process.env.OPENAI_API_KEY})
@@ -94,4 +97,46 @@ export class Agent {
         }
             
     }
+
+    suggestTitle = async (content: string): AttemptToFetch<{title: string}> => {
+        const response = await this.client.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: Prompts.titlePrompt(content),
+        })
+
+        const title = response.choices[0].message.content
+        if(!title) {
+            return failure(knownError(`No title suggested by the agent`))
+        }
+        return success({title})
+    }
+
+    extractFacts = async (content: string, relevantPersons?: string[]): AttemptToFetch<{facts: string[]}> => {
+        const factsResponse = await this.client.responses.create({
+            model: "gpt-4.1-mini",
+            input: Prompts.regularFactsPrompt(content, relevantPersons),
+          });
+    
+        const facts = factsResponse.output_text
+            .split("\n")
+            .map(l => l.replace(/^[-•]\s*/, "").trim())
+            .filter(Boolean);
+        
+        return success({facts})
+    }
+
+    redactNote = async (type: "single" | "union", facts: string[], relevantPersons?: string[]): AttemptToFetch<{note: string}> => {
+        const prompt = type === "single" ? 
+            Prompts.redactSingleNotePrompt(facts, relevantPersons) : 
+            Prompts.redactUnionNotePrompt(facts, relevantPersons)
+
+        const summaryResponse = await this.client.responses.create({
+            model: "gpt-4.1",
+            input: prompt,
+          });
+        
+        const note = summaryResponse.output_text ?? "";
+        return success({note})
+    }
+    
 }

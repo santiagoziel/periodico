@@ -14,6 +14,6 @@ export const dummySource3: NewsSource = {
     },
 
     fetchArticle: async (articleInfo: ArticleIdentifier) => {
-        return success({facts: `Contenido del artículo ${articleInfo.title} for source ${articleInfo.source}`, url: articleInfo.url})
+        return success({content: `Contenido del artículo ${articleInfo.title} for source ${articleInfo.source}`, url: articleInfo.url})
     }
 }
