@@ -1,6 +1,7 @@
 import { Agent } from "../agent/agent";
+import { NewsEditor } from "../newsEditor/news-editor";
 import { NewsSource } from "../sources/source-interface";
-import { ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, RawArticlePayload, TitleGroup, UnionArticlePayload } from "../symbols/entities";
+import { ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, PublishReadyArticle, RawArticlePayload, TitleGroup, UnionArticlePayload } from "../symbols/entities";
 import { GeneralError, knownError } from "../symbols/error-models";
 import { AttemptToFetch, failure, resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
@@ -8,10 +9,12 @@ import { DSL } from "./dsl";
 export class Application {
     mainErrors: GeneralError[] = []
     fetchErrors: GeneralError[] = []
+    redactErrors: GeneralError[] = []
     constructor(
         private readonly sources: NewsSource[], 
         private readonly dsl: DSL,
-        private readonly agent: Agent
+        private readonly agent: Agent,
+        private readonly newsEditor: NewsEditor
     ) {}
 
     private fetchArticleUrls = async () => {
@@ -70,7 +73,7 @@ export class Application {
         return singleRawPayloads.map((payload) => this.dsl.buildSingleUploadPayload(payload))
     }
 
-    private buildFileUpload = async (articlesInfo: ArticlesInfo, articleGroups: EmbeddedArticleTitles): Promise<ProcessArticleInput[]> =>{
+    private buildNews = async (articlesInfo: ArticlesInfo, articleGroups: EmbeddedArticleTitles): Promise<ProcessArticleInput[]> =>{
         const unionUploadPayloads = 
             await Promise.all(
                 articleGroups.union.map(async (articleGroup) => this.formatUnionArticleGroup(articleGroup, articlesInfo)
@@ -82,11 +85,23 @@ export class Application {
         return [...unionUploadPayloads, ...singleUploadPayloads]
     }
 
-     run = async () => {
+    private writeNews = async (sourcedNews: ProcessArticleInput[]): Promise<PublishReadyArticle[]> => {
+        const articlesAttempts = await Promise.all(sourcedNews.map((sourcedReport) => this.newsEditor.editArticle(sourcedReport)))
+        return articlesAttempts.reduce<PublishReadyArticle[]>((acc, articleAttempt) => {
+            resolveThe(articleAttempt,
+                (article) => acc.push(article),
+                (articleError) => this.redactErrors.push(articleError)
+            )
+            return acc
+        }, [])
+    }
+
+    run = async () => {
         const articlesInfo = await this.fetchArticleUrls()
         const uniqueTitles = this.dsl.flattenArticleTitles(articlesInfo)
         const articleGroups = await this.agent.groupArticles(uniqueTitles)
-        const fileUploadsInput = await this.buildFileUpload(articlesInfo, articleGroups)
-        return fileUploadsInput
+        const sourcedNews = await this.buildNews(articlesInfo, articleGroups)
+        const readyToPublishNotes = await this.writeNews(sourcedNews)
+        return readyToPublishNotes
     }
 }

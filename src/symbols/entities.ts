@@ -57,8 +57,26 @@ export type ProcessUnionArticleInput = {
 
 export type ProcessArticleInput = ProcessSingleArticleInput | ProcessUnionArticleInput
 
-export type ProcessedArticle = {
-    processedTile: string,
-    text: string,
-    personName?: string
+export type DraftArticle = {
+    facts: string[],
+    type: "single" | "union",
+    relevantPersons?: string[]
+    urlSection: string
+}
+
+export type NoteSections = {
+    title: string, 
+    note: string, 
+    urlSection: string, 
+    relevantPersons?: string[]
+}
+
+export type FinalDraftArticle = NoteSections & {
+    file: Buffer,
+}
+
+export type PublishReadyArticle = {
+    title: string,
+    file: Buffer,
+    filePath: string
 }

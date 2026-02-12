@@ -17,15 +17,40 @@ export const errorWithContext = <E extends object = object>(context: string, gen
     }
   };
 
- export const theParsedErrorFromThe = <E extends object = object>(error: GeneralError<E>, logger: (error: object) => void): string => {
-    if (weDontKnowWhatHappenedInThe(error)) {
+const safeStringify = (obj: unknown, onFail: () => void): string | null => {
+  try {
+    return JSON.stringify(obj, null, 4);
+  } catch (e) {
+    onFail();
+    return null;
+  }
+};
+
+export const theParsedErrorFromThe = <E extends object = object>(
+  error: GeneralError<E>,
+  logger?: (message: object) => void
+): string => {
+  if (weDontKnowWhatHappenedInThe(error)) {
+    const message = error.details ?? "Unknown error";
+    if (logger) {
       logger(error.error);
-      const errorMessage = error.details ?? "Unknown error";
-      return errorMessage;
-    } else {
-      if (error.details) {
-        logger(error.details);
-      }
-      return error.error;
+      return message;
     }
-  };
+    const payload =
+      safeStringify(error.error, () => console.error("Could not stringify error payload", error.error)) ??
+      `Unknown unserializable error\n${error.details ?? ""}`;
+    return `${message}\n${payload}`;
+  }
+
+  // Known error
+  if (logger) {
+    if (error.details) logger(error.details);
+    return error.error;
+  }
+  if (!error.details) return error.error;
+
+  const payload =
+    safeStringify(error.details, () => console.error("Could not stringify error payload", error.details)) ??
+    `known unserializable error\n${error.details}`;
+  return `${error.error}\n${payload}`;
+};
