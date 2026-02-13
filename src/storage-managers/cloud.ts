@@ -1,16 +1,29 @@
 import { Storage } from "@google-cloud/storage";
 import { knownError } from "../symbols/error-models";
-import { AttemptToFetch, failure, success, Unit } from "../symbols/functors";
+import { AttemptToFetch, failure, success, Unit, unit } from "../symbols/functors";
+import { InventoryManager } from "./storage-interface";
+import * as fs from "fs";
 
-export class Cloud {
+export class Cloud implements InventoryManager {
+    public id = "gcp"
     private storage = new Storage({
-        keyFilename: "./google-service-account.json",
-        projectId: process.env.GCP_PROJECT_ID,
-      });
+      keyFilename: "./google-service-account.json",
+    });
     
-     private bucketName = process.env.GCP_STORAGE_BUCKET || "";
+    private bucketName = "fytzia-diario-pruebas"
 
-      
+    constructor(){
+      if (!fs.existsSync("./google-service-account.json")) {
+        throw new Error(
+          "google-service-account.json not found! Download it from Google Cloud Console."
+        );
+      }
+    }
+
+    async createFolder(_folderPath: string): AttemptToFetch<Unit> {
+        return success(unit)
+    }
+
     async uploadFile(buffer: Buffer, destinationFileName: string): AttemptToFetch<Unit> {
         try {
           const bucket = this.storage.bucket(this.bucketName);
@@ -29,5 +42,5 @@ export class Cloud {
             console.error(errorMessage);
             return failure(knownError(errorMessage, error as Error));
         }
-      }
+    }
 }

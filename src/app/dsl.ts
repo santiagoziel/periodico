@@ -28,8 +28,19 @@ export class DSL {
         console.log(theParsedErrorFromThe(x, this.logError))
     }
 
+    cleanString = (x: string) => {
+        return x.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // remove accents
+        .replace(/[\\\/:*?"<>|""''`']/g, "")  // invalid filename chars + quotes (Windows-safe)
+        .replace(/[\x00-\x1F]/g, "")    // control characters
+        .trim()
+        .replace(/\s+/g, "-")           // spaces → hyphens
+        .replace(/-+/g, "-")            // collapse multiple hyphens
+        .replace(/[. ]+$/, "");  // no trailing dots or spaces
+      }
+
     organizeTitles = (name: string, titles: ArticleTitle[], articlesInfo: ArticlesInfo) => {
-        articlesInfo[name] = titles
+        articlesInfo[name] = titles.map((articleTitle) => ({...articleTitle, title: this.cleanString(articleTitle.title)}))
     }
 
     flattenArticleTitles = (articlesInfo: ArticlesInfo): UniqueTitle[] => {
