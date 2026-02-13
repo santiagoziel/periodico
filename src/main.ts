@@ -17,7 +17,7 @@ const main = async () => {
 
     const publisher = new Publisher([localFiles, cloudFiles])
 
-    const application = new Application([dummySource], new DSL(), agent, newsEditor, publisher)
+    const application = new Application([dummySource, dummySource2], new DSL(), agent, newsEditor, publisher)
     console.log("--------------------Start------------------------------------------")
     const articlesInfo = await application.run()
     console.log(JSON.stringify(articlesInfo, null, 4))

@@ -17,7 +17,7 @@ export class NewsEditor {
     private draftSingleArticle = async (uploadArticleInput: ProcessSingleArticleInput): AttemptToFetch<DraftArticle> => {
         const { content, url, relevantPersons } = uploadArticleInput
         const buildDraftFrom = (wrappedFacts: {facts: string[]}) => 
-            ({ facts: wrappedFacts.facts, type: "single" as const, relevantPersons, urlSection: url })
+            ({ facts: wrappedFacts.facts, type: "single" as const, relevantPersons, urlSection: `Fuente: ${url}` })
 
         const extractedFactsAttempt = await this.agent.extractFacts(content, relevantPersons)
         return attemptTo(buildDraftFrom, extractedFactsAttempt)
@@ -36,7 +36,7 @@ export class NewsEditor {
             return acc
         }, [])
 
-        return success({ facts, type: "union" as const, relevantPersons, urlSection: urls.join(", ") })
+        return success({ facts, type: "union" as const, relevantPersons, urlSection: `Fuentes: ${urls.join(", ")}` })
     }
     
     private formatNoteUsingThe = async (sections: NoteSections): Promise<FinalDraftArticle> => {
@@ -56,7 +56,7 @@ export class NewsEditor {
 
         const metaParagraphs = [
             new Paragraph({
-                children: [new TextRun({ text: `Fuente: ${urlSection}`, ...metaRunStyle })],
+                children: [new TextRun({ text: `${urlSection}`, ...metaRunStyle })],
                 ...paragraphSpacing,
             }),
             ...(articleContainsRelevantPersons
@@ -133,7 +133,7 @@ export class NewsEditor {
             const section = draft.relevantPersons && draft.relevantPersons.length > 0 ? 
                 `personasRelevantes/${draft.relevantPersons[0].toLowerCase()}` : 
                 "notasRegulares"
-            const filePath = `${today}/${section}`
+            const filePath = `${today}/${section}/${draft.type}`
 
             return {
                 processedTitle: finalDraft.processedTitle,
