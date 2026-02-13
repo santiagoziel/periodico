@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import * as fs from "fs";
 import path from "path";
 import { knownError } from "../symbols/error-models";
 import { AttemptToFetch, failure, success, Unit } from "../symbols/functors";
@@ -15,7 +15,7 @@ export class LocalStorage implements InventoryManager {
     async createFolder(folderPath: string): AttemptToFetch<Unit> {
         try {
             const fullPath = path.join(this.baseDirectory, folderPath);
-            await fs.mkdir(fullPath, { recursive: true });
+            fs.mkdirSync(fullPath, { recursive: true });
             console.log(`Folder created successfully - ${fullPath}`);
             return success({});
         } catch (error) {
@@ -27,13 +27,10 @@ export class LocalStorage implements InventoryManager {
 
     async uploadFile(buffer: Buffer, destinationFileName: string): AttemptToFetch<Unit> {
         try {
-            const filePath = path.join(this.baseDirectory, destinationFileName);
-            const directory = path.dirname(filePath);
-
-            await fs.mkdir(directory, { recursive: true });
-            await fs.writeFile(filePath, buffer);
-
-            console.log(`File saved successfully - ${filePath}`);
+            const docPath = path.join(this.baseDirectory, destinationFileName);
+            console.log(`Trying to store into ${docPath}`)
+            fs.writeFileSync(docPath, buffer);
+            console.log(`File saved successfully - ${destinationFileName}`);
             return success({});
         } catch (error) {
             const errorMessage = `File save error: ${(error as Error).message}`;

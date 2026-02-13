@@ -98,7 +98,7 @@ export class Agent {
             
     }
 
-    suggestTitle = async (content: string): AttemptToFetch<{title: string}> => {
+    suggestTitle = async (content: string): AttemptToFetch<{suggestedTitle: string}> => {
         const response = await this.client.chat.completions.create({
             model: "gpt-4o-mini",
             messages: Prompts.titlePrompt(content),
@@ -108,7 +108,7 @@ export class Agent {
         if(!title) {
             return failure(knownError(`No title suggested by the agent`))
         }
-        return success({title})
+        return success({suggestedTitle: title})
     }
 
     extractFacts = async (content: string, relevantPersons?: string[]): AttemptToFetch<{facts: string[]}> => {

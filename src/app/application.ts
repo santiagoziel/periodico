@@ -105,6 +105,10 @@ export class Application {
         const sourcedNews = await this.buildNews(articlesInfo, articleGroups)
         const readyToPublishNotes = await this.writeNews(sourcedNews)
         const publishResults = await this.publisher.publish(readyToPublishNotes)
+
+        console.log("Main errors: " + JSON.stringify(this.mainErrors, null, 2))
+        console.log("Fetch errors: " + JSON.stringify(this.fetchErrors, null, 2))
+        console.log("Redact errors: " + JSON.stringify(this.redactErrors, null, 2))
         return publishResults
     }
 }

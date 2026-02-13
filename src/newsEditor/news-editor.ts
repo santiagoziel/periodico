@@ -40,7 +40,10 @@ export class NewsEditor {
     }
     
     private formatNoteUsingThe = async (sections: NoteSections): Promise<FinalDraftArticle> => {
-        const {note, title, urlSection, relevantPersons} = sections
+        const {note, processedTitle: title, urlSection, relevantPersons} = sections
+        console.log("**********")
+        console.log(title)
+        console.log("**********")
         const paragraphSpacing = { spacing: { after: 240 } }; // One line between paragraphs
         const summaryParagraphs = note
             .split("\n")
@@ -100,12 +103,23 @@ export class NewsEditor {
         return {file: await Packer.toBuffer(doc), ...sections};
     }
 
+    cleanString = (x: string) => {
+        return x.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // remove accents
+        .replace(/[\\\/:*?"<>|""''`']/g, "")  // invalid filename chars + quotes (Windows-safe)
+        .replace(/[\x00-\x1F]/g, "")    // control characters
+        .trim()
+        .replace(/\s+/g, "-")           // spaces → hyphens
+        .replace(/-+/g, "-")            // collapse multiple hyphens
+        .replace(/[. ]+$/, "");  // no trailing dots or spaces
+      }
+
     private greenLight = async (draft: DraftArticle): AttemptToFetch<PublishReadyArticle> => {
         const { facts, type, relevantPersons, urlSection } = draft
 
         const titleNoteFromThe = async (wrappedNote: {note: string}) => {
-            const organizeNoteSections = (wrappedTitle: {title: string}): NoteSections => ({
-                title: wrappedTitle.title, 
+            const organizeNoteSections = (wrappedTitle: {suggestedTitle: string}): NoteSections => ({
+                processedTitle: this.cleanString(wrappedTitle.suggestedTitle), 
                 note: wrappedNote.note, 
                 urlSection, 
                 relevantPersons
@@ -122,7 +136,7 @@ export class NewsEditor {
             const filePath = `${today}/${section}`
 
             return {
-                title: finalDraft.title,
+                processedTitle: finalDraft.processedTitle,
                 file: finalDraft.file,
                 filePath: filePath
             }

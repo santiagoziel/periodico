@@ -15,11 +15,13 @@ const main = async () => {
     const localFiles = new LocalStorage()
     const cloudFiles = new Cloud() 
 
-    const publisher = new Publisher([localFiles])
+    const publisher = new Publisher([localFiles, cloudFiles])
 
     const application = new Application([dummySource], new DSL(), agent, newsEditor, publisher)
+    console.log("--------------------Start------------------------------------------")
     const articlesInfo = await application.run()
     console.log(JSON.stringify(articlesInfo, null, 4))
+    console.log("--------------------End------------------------------------------")
 }
 
 main().catch(console.error)

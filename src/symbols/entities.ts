@@ -65,7 +65,7 @@ export type DraftArticle = {
 }
 
 export type NoteSections = {
-    title: string, 
+    processedTitle: string, 
     note: string, 
     urlSection: string, 
     relevantPersons?: string[]
@@ -76,7 +76,7 @@ export type FinalDraftArticle = NoteSections & {
 }
 
 export type PublishReadyArticle = {
-    title: string,
+    processedTitle: string,
     file: Buffer,
     filePath: string
 }
