@@ -10,7 +10,7 @@ export class Prompts {
 
 
     static titlePrompt(content: string): AgentInput {
-        return [systemMessage(`Sugiere un título para el siguiente texto`), userMessage(content)]
+        return [systemMessage(`Sugiere un título para el siguiente texto, no utilizes ningun caracter especial ni acentos ya que se usan para crear el nombre del archivo`), userMessage(content)]
     }
 
     static regularFactsPrompt(content: string, foundPersons?: string[]): AgentInput {

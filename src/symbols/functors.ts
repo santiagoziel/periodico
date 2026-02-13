@@ -6,6 +6,7 @@ export type Attempt<A extends object,B extends object> = Success<A> | Failure<B>
 export type AttemptToFetch<A extends object> = Promise<Attempt<A, GeneralError>>
 
 export type Unit = {}
+export const unit: Unit = {}
 
 export const success = <A extends object>(a: A): Success<A> => ({is: "Successful", ...a})
 export const failure = <B extends object>(b: B): Failure<B> => ({is: "Failed", ...b})

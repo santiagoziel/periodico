@@ -29,7 +29,7 @@ export class DSL {
     }
 
     organizeTitles = (name: string, titles: ArticleTitle[], articlesInfo: ArticlesInfo) => {
-        articlesInfo[name] = titles
+        articlesInfo[name] = titles.map((articleTitle) => ({...articleTitle, title: articleTitle.title}))
     }
 
     flattenArticleTitles = (articlesInfo: ArticlesInfo): UniqueTitle[] => {

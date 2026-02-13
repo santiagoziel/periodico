@@ -1,5 +1,6 @@
 import { Agent } from "../agent/agent";
 import { NewsEditor } from "../newsEditor/news-editor";
+import { Publisher } from "../publisher/publisher";
 import { NewsSource } from "../sources/source-interface";
 import { ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, PublishReadyArticle, RawArticlePayload, TitleGroup, UnionArticlePayload } from "../symbols/entities";
 import { GeneralError, knownError } from "../symbols/error-models";
@@ -14,7 +15,8 @@ export class Application {
         private readonly sources: NewsSource[], 
         private readonly dsl: DSL,
         private readonly agent: Agent,
-        private readonly newsEditor: NewsEditor
+        private readonly newsEditor: NewsEditor,
+        private readonly publisher: Publisher
     ) {}
 
     private fetchArticleUrls = async () => {
@@ -102,6 +104,11 @@ export class Application {
         const articleGroups = await this.agent.groupArticles(uniqueTitles)
         const sourcedNews = await this.buildNews(articlesInfo, articleGroups)
         const readyToPublishNotes = await this.writeNews(sourcedNews)
-        return readyToPublishNotes
+        const publishResults = await this.publisher.publish(readyToPublishNotes)
+
+        console.log("Main errors: " + JSON.stringify(this.mainErrors, null, 2))
+        console.log("Fetch errors: " + JSON.stringify(this.fetchErrors, null, 2))
+        console.log("Redact errors: " + JSON.stringify(this.redactErrors, null, 2))
+        return publishResults
     }
 }
