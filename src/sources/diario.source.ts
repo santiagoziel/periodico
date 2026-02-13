@@ -1,3 +1,4 @@
+import { VIPs } from "../symbols/constants";
 import { ArticleIdentifier, ArticleTitle } from "../symbols/entities";
 import { knownError, unknownError } from "../symbols/error-models";
 import { failure, success } from "../symbols/functors";
@@ -6,6 +7,9 @@ import * as cheerio from "cheerio";
 
 export class DiarioSource implements NewsSource {
     name = "Intolerancia Diario";
+
+    private personsToCheck = VIPs
+
     getTitles = async () => {
         const policySourceLink = "https://intoleranciadiario.com/section/politica";
         const policySectionResponse = await fetch(policySourceLink);
@@ -42,7 +46,7 @@ export class DiarioSource implements NewsSource {
         
         return success({titles: policyLinks})
     }
-    
+
     fetchArticle = async (articleInfo: ArticleIdentifier) => {
         try {
             const response = await fetch(articleInfo.url);
@@ -64,7 +68,9 @@ export class DiarioSource implements NewsSource {
 
             const content = paragraphs.join("\n\n");
 
-            return success({content, url: articleInfo.url})
+            const relevantPersons = VIPs.filter(person => content.toLowerCase().includes(person.toLowerCase()));
+
+            return success({content, url: articleInfo.url, relevantPersons})
         } catch (error) {
             return failure(unknownError(error as Error, `Error fetching article ${articleInfo.url}`))      
         }
