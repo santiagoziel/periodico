@@ -19,3 +19,6 @@ export const VIPs = [
     "pepe chedraui",
     "jose chedraui"
     ];
+
+
+export const MAX_CONCURRENT_FETCHES = 6;

@@ -29,7 +29,7 @@ const main = async () => {
         const sintesisSource = new SintesisSource()
         const pueblaOnlineSource = new PueblaOnlineSource(browser)
 
-        const sources = [pueblaOnlineSource]
+        const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource]
         
         const application = new Application(
             sources,

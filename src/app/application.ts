@@ -7,9 +7,7 @@ import { ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAtt
 import { GeneralError, knownError } from "../symbols/error-models";
 import { AttemptToFetch, failure, resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
-
-/** Maximum concurrent article fetches to avoid resource exhaustion */
-const MAX_CONCURRENT_FETCHES = 5;
+import { MAX_CONCURRENT_FETCHES } from "../symbols/constants";
 
 export class Application {
     mainErrors: GeneralError[] = []

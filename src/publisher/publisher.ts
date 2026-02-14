@@ -2,7 +2,7 @@ import { InventoryManager } from "../storage-managers/storage-interface"
 import { PublishReadyArticle } from "../symbols/entities"
 
 export class Publisher {
-    private baseDirectory = "version3/test"
+    private baseDirectory = "version4"
     constructor(private readonly storagePlaces: InventoryManager[]) {}
 
     publish = async (articles: PublishReadyArticle[]) => {
