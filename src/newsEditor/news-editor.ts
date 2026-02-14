@@ -26,7 +26,7 @@ export class NewsEditor {
     private draftUnionArticle = async (uploadArticleInput: ProcessUnionArticleInput): AttemptToFetch<DraftArticle> => {
         const {contents, urls, relevantPersons } =  uploadArticleInput
 
-        const factsAttempts = await Promise.all(contents.map(async (content) => this.agent.extractFacts(content)))
+        const factsAttempts = await Promise.all(contents.map(async (content) => this.agent.extractFacts(content, relevantPersons)))
 
         const facts = factsAttempts.reduce<string[]>((acc, attempt) => {
             resolveThe(attempt, 
