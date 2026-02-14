@@ -7,6 +7,7 @@ import { DiarioSource } from "./sources/diario.source"
 import { dummySource } from "./sources/dummy/dummy-source"
 import { dummySource2 } from "./sources/dummy/dummy-source2"
 import { dummySource3 } from "./sources/dummy/dummy-source3"
+import { SintesisSource } from "./sources/sintesis.source"
 import { Cloud } from "./storage-managers/cloud"
 import { LocalStorage } from "./storage-managers/local-storage"
 
@@ -19,8 +20,9 @@ const main = async () => {
     const publisher = new Publisher([localFiles, cloudFiles])
 
     const intoleranciaSource = new DiarioSource()
-
-    const application = new Application([intoleranciaSource], new DSL(), agent, newsEditor, publisher)
+    const sintesisSource = new SintesisSource()
+    
+    const application = new Application([intoleranciaSource, sintesisSource], new DSL(), agent, newsEditor, publisher)
     console.log("--------------------Start------------------------------------------")
     const articlesInfo = await application.run()
     console.log(JSON.stringify(articlesInfo, null, 4))
