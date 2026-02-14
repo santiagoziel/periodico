@@ -9,7 +9,6 @@ export const VIPs = [
     "carla lopez",
     "Michelle talavera",
     "alexa espidio",
-    "sergio salomón cespedes",
     "sergio salomón",
     "ceci arellano",
     "cecilia arellano",

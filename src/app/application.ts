@@ -1,3 +1,4 @@
+import pLimit from "p-limit";
 import { Agent } from "../agent/agent";
 import { NewsEditor } from "../newsEditor/news-editor";
 import { Publisher } from "../publisher/publisher";
@@ -7,10 +8,15 @@ import { GeneralError, knownError } from "../symbols/error-models";
 import { AttemptToFetch, failure, resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
 
+/** Maximum concurrent article fetches to avoid resource exhaustion */
+const MAX_CONCURRENT_FETCHES = 5;
+
 export class Application {
     mainErrors: GeneralError[] = []
     fetchErrors: GeneralError[] = []
     redactErrors: GeneralError[] = []
+    private readonly fetchLimit = pLimit(MAX_CONCURRENT_FETCHES);
+
     constructor(
         private readonly sources: NewsSource[], 
         private readonly dsl: DSL,
@@ -41,6 +47,49 @@ export class Application {
          return source.fetchArticle(articleIdentifier) 
     }
 
+    /** Check if a source requires sequential processing */
+    private sourceRequiresSequential = (sourceName: string): boolean => {
+        const source = this.sources.find(s => s.name === sourceName)
+        return source?.requiresSequential ?? false
+    }
+
+    /** Fetch articles respecting sequential requirements for certain sources */
+    private fetchArticlesWithConcurrencyControl = async (
+        articleIdentifiers: ArticleIdentifier[]
+    ): Promise<FetchArticleAttempt[]> => {
+        // Separate identifiers by whether their source requires sequential processing
+        const sequential: ArticleIdentifier[] = []
+        const parallel: ArticleIdentifier[] = []
+
+        for (const id of articleIdentifiers) {
+            if (this.sourceRequiresSequential(id.source)) {
+                sequential.push(id)
+            } else {
+                parallel.push(id)
+            }
+        }
+
+        // Fetch parallel sources with concurrency limit
+        const parallelResults = await Promise.all(
+            parallel.map(id => this.fetchLimit(() => this.fetchArticle(id)))
+        )
+
+        // Fetch sequential sources one at a time
+        const sequentialResults: FetchArticleAttempt[] = []
+        for (const id of sequential) {
+            const result = await this.fetchArticle(id)
+            sequentialResults.push(result)
+        }
+
+        // Return results in original order
+        const resultsMap = new Map<string, FetchArticleAttempt>()
+        
+        parallel.forEach((id, idx) => resultsMap.set(id.url, parallelResults[idx]))
+        sequential.forEach((id, idx) => resultsMap.set(id.url, sequentialResults[idx]))
+
+        return articleIdentifiers.map(id => resultsMap.get(id.url)!)
+    }
+
     private sortFetchAttempt = (attempt: FetchArticleAttempt, section: RawArticlePayload[]) => {
         resolveThe(attempt, 
             (payload) => section.push(payload),
@@ -48,10 +97,10 @@ export class Application {
          )
     }
 
-    private formatUnionArticleGroup = async (articleGroup: TitleGroup, articlesInfo: ArticlesInfo) => {
+    private fetchUnionArticleGroup = async (articleGroup: TitleGroup, articlesInfo: ArticlesInfo) => {
         const articlesIds = articleGroup.map((articleTitle) => this.dsl.buildArticleId(articlesInfo, articleTitle))
 
-        const rawArticleAttempts = await Promise.all(articlesIds.map(async (articleIdentifier) => this.fetchArticle(articleIdentifier)))
+        const rawArticleAttempts = await this.fetchArticlesWithConcurrencyControl(articlesIds)
         
         const rawArticlesPayloads: UnionArticlePayload = rawArticleAttempts.reduce<UnionArticlePayload>((acc, payloadAttempt) => {
             this.sortFetchAttempt(payloadAttempt, acc)
@@ -62,10 +111,9 @@ export class Application {
     }
 
     private formatSingleArticleGroup = async (articleGroup: TitleGroup, articlesInfo: ArticlesInfo)=> {
-        const singleFetchAttempts = await Promise.all(articleGroup.map(async (uniqueTitle) => {
-            const articleIdentifier = this.dsl.buildArticleId(articlesInfo, uniqueTitle)
-            return this.fetchArticle(articleIdentifier)
-        }))
+        const articleIdentifiers = articleGroup.map((uniqueTitle) => this.dsl.buildArticleId(articlesInfo, uniqueTitle))
+
+        const singleFetchAttempts = await this.fetchArticlesWithConcurrencyControl(articleIdentifiers)
 
         const singleRawPayloads = singleFetchAttempts.reduce<RawArticlePayload[]>((acc, fetchAttempt) => {
             this.sortFetchAttempt(fetchAttempt, acc)
@@ -75,16 +123,16 @@ export class Application {
         return singleRawPayloads.map((payload) => this.dsl.buildSingleUploadPayload(payload))
     }
 
-    private buildNews = async (articlesInfo: ArticlesInfo, articleGroups: EmbeddedArticleTitles): Promise<ProcessArticleInput[]> =>{
-        const unionUploadPayloads = 
+    private fetchNews = async (articlesInfo: ArticlesInfo, articleGroups: EmbeddedArticleTitles): Promise<ProcessArticleInput[]> =>{
+        const unionNewsPayloads = 
             await Promise.all(
-                articleGroups.union.map(async (articleGroup) => this.formatUnionArticleGroup(articleGroup, articlesInfo)
+                articleGroups.union.map(async (articleGroup) => this.fetchUnionArticleGroup(articleGroup, articlesInfo)
             ))
 
-        const singleUploadPayloads = 
+        const singleNewsPayloads = 
             await this.formatSingleArticleGroup(articleGroups.single, articlesInfo)
 
-        return [...unionUploadPayloads, ...singleUploadPayloads]
+        return [...unionNewsPayloads, ...singleNewsPayloads]
     }
 
     private writeNews = async (sourcedNews: ProcessArticleInput[]): Promise<PublishReadyArticle[]> => {
@@ -102,7 +150,7 @@ export class Application {
         const articlesInfo = await this.fetchArticleUrls()
         const uniqueTitles = this.dsl.flattenArticleTitles(articlesInfo)
         const articleGroups = await this.agent.groupArticles(uniqueTitles)
-        const sourcedNews = await this.buildNews(articlesInfo, articleGroups)
+        const sourcedNews = await this.fetchNews(articlesInfo, articleGroups)
         const readyToPublishNotes = await this.writeNews(sourcedNews)
         const publishResults = await this.publisher.publish(readyToPublishNotes)
 

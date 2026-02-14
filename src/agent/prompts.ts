@@ -2,7 +2,9 @@ import { AgentInput, systemMessage, userMessage } from "./agent.types"
 
 function censored(prompt: string, foundPersons?: string[]): string {
     if (!foundPersons || foundPersons.length === 0) return prompt
-    const suffix = `Omite cualquier Informacion que pudiera hacer ver a una de estas personas ${foundPersons.join(", ")} de manera negativa.`
+    const suffix = foundPersons.length === 1 ? 
+        `Muestra a la persona ${foundPersons[0]} de manera positiva.` :
+        `Muestra a las personas ${foundPersons.join(", ")} de manera positiva.`
     return `${prompt}\n\n${suffix}`
 }
 
@@ -19,9 +21,9 @@ export class Prompts {
 
             Reglas:
 
-            Extrae ÚNICAMENTE afirmaciones fácticas verificables que estén explícitamente presentes en el texto del artículo de noticias.
+            Extrae afirmaciones fácticas verificables presentes en el texto del artículo de noticias.
 
-            EXCLUYE opiniones, reacciones, especulación, análisis o comentarios del autor del artículo.
+            EXCLUYE Informacion relacionada con el autor del artículo.
 
             Devuelve una lista con viñetas de afirmaciones fácticas cortas y verificables relacionadas con el artículo de noticias.
             `.trim()
@@ -39,8 +41,6 @@ export class Prompts {
         Incluye ÚNICAMENTE los hechos proporcionados.
 
         NO introduzcas información nueva.
-
-        NO incluyas opiniones, especulación ni reacciones.
         `.trim()
 
         return [systemMessage(censored(prompt, relevantPersons)), userMessage(facts.join("\n"))]
@@ -60,8 +60,6 @@ export class Prompts {
         Incluye ÚNICAMENTE los hechos proporcionados de cada artículo.
 
         NO introduzcas información nueva.
-
-        NO incluyas opiniones, especulación ni reacciones.
         `.trim()
 
         return [systemMessage(censored(prompt, relevantPersons)), userMessage(facts.join("\n"))]
