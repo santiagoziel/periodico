@@ -40,10 +40,7 @@ const main = async () => {
         )
 
         console.log("--------------------Start------------------------------------------")
-        
-        const articlesInfo = await application.run()
-        console.log(JSON.stringify(articlesInfo, null, 4))
-        
+        await application.run()
         console.log("--------------------End------------------------------------------")
     } finally {
         // Always clean up browser, even if an error occurs
