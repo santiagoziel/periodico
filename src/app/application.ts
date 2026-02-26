@@ -3,16 +3,17 @@ import { Agent } from "../agent/agent";
 import { NewsEditor } from "../newsEditor/news-editor";
 import { Publisher } from "../publisher/publisher";
 import { NewsSource } from "../sources/source-interface";
+import { MAX_CONCURRENT_FETCHES } from "../symbols/constants";
 import { ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, PublishReadyArticle, RawArticlePayload, TitleGroup, UnionArticlePayload } from "../symbols/entities";
 import { GeneralError, knownError } from "../symbols/error-models";
-import { AttemptToFetch, failure, resolveThe } from "../symbols/functors";
+import { AttemptToFetch, buildSuccessPayloadFrom, failure, resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
-import { MAX_CONCURRENT_FETCHES } from "../symbols/constants";
 
 export class Application {
     mainErrors: GeneralError[] = []
     fetchErrors: GeneralError[] = []
     redactErrors: GeneralError[] = []
+    publishErrors: GeneralError[] = []
     private readonly fetchLimit = pLimit(MAX_CONCURRENT_FETCHES);
 
     constructor(
@@ -144,6 +145,19 @@ export class Application {
         }, [])
     }
 
+    private logResults = () => {
+        const weHadAnError = this.mainErrors.length > 0 || this.fetchErrors.length > 0 || this.redactErrors.length > 0 || this.publishErrors.length > 0
+
+        if(weHadAnError) {
+            console.log("Main errors: " + JSON.stringify(this.mainErrors, null, 2))
+            console.log("Fetch errors: " + JSON.stringify(this.fetchErrors, null, 2))
+            console.log("Redact errors: " + JSON.stringify(this.redactErrors, null, 2))
+            console.log("Publish errors: " + JSON.stringify(this.publishErrors, null, 2))
+        } else {
+            console.log("Successfully published all articles!!")
+        }
+    }
+
     run = async () => {
         const articlesInfo = await this.fetchArticleUrls()
         const uniqueTitles = this.dsl.flattenArticleTitles(articlesInfo)
@@ -152,9 +166,11 @@ export class Application {
         const readyToPublishNotes = await this.writeNews(sourcedNews)
         const publishResults = await this.publisher.publish(readyToPublishNotes)
 
-        console.log("Main errors: " + JSON.stringify(this.mainErrors, null, 2))
-        console.log("Fetch errors: " + JSON.stringify(this.fetchErrors, null, 2))
-        console.log("Redact errors: " + JSON.stringify(this.redactErrors, null, 2))
-        return publishResults
+        publishResults.forEach((publishResult) => {
+            buildSuccessPayloadFrom(publishResult.storageAttempt, 
+                (storageError) => this.publishErrors.push(storageError))
+        })
+
+        this.logResults()
     }
 }
