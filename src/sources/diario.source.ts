@@ -8,6 +8,21 @@ import * as cheerio from "cheerio";
 export class DiarioSource implements NewsSource {
     name = "Intolerancia Diario";
 
+    private removeNonRelevanttTitles = (titles: ArticleTitle[]) => {
+        const mexicoDate = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Mexico_City',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).format(new Date());
+
+        // mexicoDate is "YYYY-MM-DD", e.g. "2026-02-25"
+        const [year, month, day] = mexicoDate.split('-');
+        const urlDateSegment = `/${year}/${month}/${day}/`;
+
+        return titles.filter(title => title.url.includes(urlDateSegment));
+    }
+
     getTitles = async () => {
         const policySourceLink = "https://intoleranciadiario.com/section/politica";
         const policySectionResponse = await fetch(policySourceLink);
@@ -42,7 +57,7 @@ export class DiarioSource implements NewsSource {
             }
         });
         
-        return success({titles: policyLinks})
+        return success({titles: this.removeNonRelevanttTitles(policyLinks)})
     }
 
     fetchArticle = async (articleInfo: ArticleIdentifier) => {
