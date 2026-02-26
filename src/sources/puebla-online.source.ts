@@ -15,29 +15,42 @@ export class PueblaOnlineSource implements NewsSource {
         locale: 'es-MX',
     } as const;
 
-    constructor(private readonly browser: Browser) {}
+    constructor(private readonly browser: Browser, public readonly earliestDate: Date) {}
+
+    private getEarliestDateStr = () => new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Mexico_City',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(this.earliestDate);
+
+    private getEarliestYear = () => new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Mexico_City',
+        year: 'numeric',
+    }).format(this.earliestDate);
 
     getTitles = async () => {
-        const publicacionesSourceLink = "https://www.pueblaonline.com.mx/2026/puebla/";
+        const year = this.getEarliestYear();
+        const publicacionesSourceLink = `https://www.pueblaonline.com.mx/${year}/puebla/`;
         const context = await this.browser.newContext(this.browserContextOptions);
-        
+
         try {
             const page = await context.newPage();
-            
+
             console.log(`Navigating to ${publicacionesSourceLink}...`);
             await page.goto(publicacionesSourceLink, { waitUntil: 'networkidle' });
-            
+
             console.log(`Page loaded successfully`);
-    
+
             const html = await page.content();
             const $ = cheerio.load(html);
-    
+
             const articles: ArticleTitle[] = [];
             const baseUrl = "https://www.pueblaonline.com.mx";
-    
+
             // Find all article links - Puebla Online uses links within article titles/cards
-            // Articles typically have URLs like /2026/puebla/article-slug/
-            $("a[href*='/2026/puebla/']").each((_, element) => {
+            // Articles typically have URLs like /{year}/puebla/article-slug/
+            $(`a[href*='/${year}/puebla/']`).each((_, element) => {
                 const $el = $(element);
                 const href = $el.attr("href");
                 const title = $el.text().trim();
@@ -82,17 +95,12 @@ export class PueblaOnlineSource implements NewsSource {
         
             $("script, style, nav, header, footer, aside").remove();
 
-            const mexicoDate = new Intl.DateTimeFormat('en-CA', {
-                timeZone: 'America/Mexico_City',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-            }).format(new Date());
+            const earliestDateStr = this.getEarliestDateStr();
 
             const articleDatetime = $("time.entry-date.published").attr("datetime") ?? "";
             const articleDate = articleDatetime.split("T")[0];
 
-            if (articleDate !== mexicoDate) {
+            if (articleDate < earliestDateStr) {
                 return failure(expectedError(`Puebla Online: skipping article from ${articleDate}`));
             }
            

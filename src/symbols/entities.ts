@@ -1,6 +1,8 @@
 import { GeneralError } from "./error-models"
 import { Attempt } from "./functors"
 
+export type AppMode = "production" | "debug"
+
 export type ArticleTitle = {
     url: string,
     title: string

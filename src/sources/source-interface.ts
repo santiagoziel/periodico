@@ -3,6 +3,7 @@ import { AttemptToFetch } from "../symbols/functors";
         
 export interface NewsSource {
     name: string;
+    readonly earliestDate: Date;
 
     requiresSequential?: boolean;
     getTitles(): AttemptToFetch<{titles: ArticleTitle[]}>

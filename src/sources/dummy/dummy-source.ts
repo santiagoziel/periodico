@@ -5,6 +5,7 @@ import { NewsSource } from "../source-interface"
 
 export const dummySource: NewsSource = {
     name: "dummy",
+    earliestDate: new Date(),
     getTitles: async () => {
         return success({titles: [
             {url: "https://dummy1.com/news/1", title: "Terremoto de magnitud 6,5 sacude la costa de Oaxaca"},

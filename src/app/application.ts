@@ -4,7 +4,7 @@ import { NewsEditor } from "../newsEditor/news-editor";
 import { Publisher } from "../publisher/publisher";
 import { NewsSource } from "../sources/source-interface";
 import { MAX_CONCURRENT_FETCHES } from "../symbols/constants";
-import { ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, PublishReadyArticle, RawArticlePayload, TitleGroup, UnionArticlePayload } from "../symbols/entities";
+import { AppMode, ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, PublishReadyArticle, RawArticlePayload, TitleGroup, UnionArticlePayload } from "../symbols/entities";
 import { GeneralError, knownError, weExpectedThisInThe } from "../symbols/error-models";
 import { AttemptToFetch, buildSuccessPayloadFrom, failure, resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
@@ -18,7 +18,7 @@ export class Application {
     private readonly fetchLimit = pLimit(MAX_CONCURRENT_FETCHES);
 
     constructor(
-        private readonly debugMode: boolean,
+        private readonly mode: AppMode,
         private readonly sources: NewsSource[], 
         private readonly dsl: DSL,
         private readonly agent: Agent,
@@ -162,7 +162,7 @@ export class Application {
             console.log("Successfully published all articles!!")
         }
 
-        if(this.debugMode) {
+        if(this.mode === "debug") {
             console.log("Expected errors: " + JSON.stringify(this.expectedErrors, null, 2))
         }
     }

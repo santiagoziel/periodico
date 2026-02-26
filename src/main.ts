@@ -25,14 +25,15 @@ const main = async () => {
 
         const publisher = new Publisher([localFiles, cloudFiles])
 
-        const intoleranciaSource = new DiarioSource()
-        const sintesisSource = new SintesisSource()
-        const pueblaOnlineSource = new PueblaOnlineSource(browser)
+        const earliestDate = new Date()
+        const intoleranciaSource = new DiarioSource(earliestDate)
+        const sintesisSource = new SintesisSource(earliestDate)
+        const pueblaOnlineSource = new PueblaOnlineSource(browser, earliestDate)
 
         const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource]
         
         const application = new Application(
-            true, // debug mode on to log expected errors
+            "debug", // debug mode on to log expected errors
             sources,
             new DSL(), 
             agent, 

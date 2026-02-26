@@ -8,19 +8,22 @@ import * as cheerio from "cheerio";
 export class DiarioSource implements NewsSource {
     name = "Intolerancia Diario";
 
+    constructor(public readonly earliestDate: Date) {}
+
     private removeNonRelevanttTitles = (titles: ArticleTitle[]) => {
-        const mexicoDate = new Intl.DateTimeFormat('en-CA', {
+        const earliestDateStr = new Intl.DateTimeFormat('en-CA', {
             timeZone: 'America/Mexico_City',
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
-        }).format(new Date());
+        }).format(this.earliestDate); // e.g. "2026-02-25"
 
-        // mexicoDate is "YYYY-MM-DD", e.g. "2026-02-25"
-        const [year, month, day] = mexicoDate.split('-');
-        const urlDateSegment = `/${year}/${month}/${day}/`;
-
-        return titles.filter(title => title.url.includes(urlDateSegment));
+        return titles.filter(title => {
+            const match = title.url.match(/\/(\d{4})\/(\d{2})\/(\d{2})\//);
+            if (!match) return false;
+            const urlDate = `${match[1]}-${match[2]}-${match[3]}`;
+            return urlDate >= earliestDateStr;
+        });
     }
 
     getTitles = async () => {
