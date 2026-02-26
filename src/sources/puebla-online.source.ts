@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 import { Browser } from "playwright";
 import { ArticleIdentifier, ArticleTitle } from "../symbols/entities";
-import { knownError, unknownError } from "../symbols/error-models";
+import { expectedError, knownError, unknownError } from "../symbols/error-models";
 import { failure, success } from "../symbols/functors";
 import { NewsSource } from "./source-interface";
 import { VIPs } from "../symbols/constants";
@@ -81,6 +81,20 @@ export class PueblaOnlineSource implements NewsSource {
             const $ = cheerio.load(html);
         
             $("script, style, nav, header, footer, aside").remove();
+
+            const mexicoDate = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'America/Mexico_City',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+            }).format(new Date());
+
+            const articleDatetime = $("time.entry-date.published").attr("datetime") ?? "";
+            const articleDate = articleDatetime.split("T")[0];
+
+            if (articleDate !== mexicoDate) {
+                return failure(expectedError(`Puebla Online: skipping article from ${articleDate}`));
+            }
            
             const paragraphs = $("article, .article-content, .entry-content, main")
               .find("p")

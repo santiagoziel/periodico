@@ -5,7 +5,7 @@ import { Publisher } from "../publisher/publisher";
 import { NewsSource } from "../sources/source-interface";
 import { MAX_CONCURRENT_FETCHES } from "../symbols/constants";
 import { ArticleIdentifier, ArticlesInfo, EmbeddedArticleTitles, FetchArticleAttempt, ProcessArticleInput, PublishReadyArticle, RawArticlePayload, TitleGroup, UnionArticlePayload } from "../symbols/entities";
-import { GeneralError, knownError } from "../symbols/error-models";
+import { GeneralError, knownError, weExpectedThisInThe } from "../symbols/error-models";
 import { AttemptToFetch, buildSuccessPayloadFrom, failure, resolveThe } from "../symbols/functors";
 import { DSL } from "./dsl";
 
@@ -14,9 +14,11 @@ export class Application {
     fetchErrors: GeneralError[] = []
     redactErrors: GeneralError[] = []
     publishErrors: GeneralError[] = []
+    expectedErrors: GeneralError[] = []
     private readonly fetchLimit = pLimit(MAX_CONCURRENT_FETCHES);
 
     constructor(
+        private readonly debugMode: boolean,
         private readonly sources: NewsSource[], 
         private readonly dsl: DSL,
         private readonly agent: Agent,
@@ -90,9 +92,12 @@ export class Application {
     }
 
     private sortFetchAttempt = (attempt: FetchArticleAttempt, section: RawArticlePayload[]) => {
-        resolveThe(attempt, 
+        resolveThe(attempt,
             (payload) => section.push(payload),
-            (erroredFetch) => this.fetchErrors.push(erroredFetch)
+            (erroredFetch) => {
+                if (!weExpectedThisInThe(erroredFetch)) return this.fetchErrors.push(erroredFetch)
+                else return this.expectedErrors.push(erroredFetch)
+            }
          )
     }
 
@@ -155,6 +160,10 @@ export class Application {
             console.log("Publish errors: " + JSON.stringify(this.publishErrors, null, 2))
         } else {
             console.log("Successfully published all articles!!")
+        }
+
+        if(this.debugMode) {
+            console.log("Expected errors: " + JSON.stringify(this.expectedErrors, null, 2))
         }
     }
 

@@ -32,6 +32,7 @@ const main = async () => {
         const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource]
         
         const application = new Application(
+            true, // debug mode on to log expected errors
             sources,
             new DSL(), 
             agent, 

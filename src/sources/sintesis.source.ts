@@ -8,6 +8,20 @@ import * as cheerio from "cheerio";
 export class SintesisSource implements NewsSource {
     name = "Síntesis";
 
+    private removeNonRelevanttTitles = (titles: ArticleTitle[]) => {
+        const mexicoDate = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Mexico_City',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).format(new Date());
+
+        const [year, month, day] = mexicoDate.split('-');
+        const urlDateSegment = `/${year}/${month}/${day}/`;
+
+        return titles.filter(title => title.url.includes(urlDateSegment));
+    }
+
     getTitles = async () => {
         const gobiernoSourceLink = "https://sintesis.com.mx/puebla/category/gobierno/";
         const gobiernoSectionResponse = await fetch(gobiernoSourceLink);
@@ -43,7 +57,7 @@ export class SintesisSource implements NewsSource {
             }
           });
         
-        return success({titles: gobiernoLinks})
+        return success({titles: this.removeNonRelevanttTitles(gobiernoLinks)})
     }
 
     fetchArticle = async (articleInfo: ArticleIdentifier) => {
