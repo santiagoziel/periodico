@@ -5,6 +5,7 @@ import { NewsSource } from "../source-interface"
 
 export const dummySource2: NewsSource = {
     name: "dummy2",
+    earliestDate: new Date(),
     getTitles: async () => {
         return success({titles: [
             {url: "https://dummy2.com/news/5", title: "Fuerte sismo de 6.5 grados afecta región costera de Oaxaca"},
