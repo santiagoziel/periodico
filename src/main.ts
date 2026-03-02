@@ -10,6 +10,7 @@ import { dummySource2 } from "./sources/dummy/dummy-source2"
 import { dummySource3 } from "./sources/dummy/dummy-source3"
 import { PueblaOnlineSource } from "./sources/puebla-online.source"
 import { SintesisSource } from "./sources/sintesis.source"
+import { SolSource } from "./sources/sol.source"
 import { Cloud } from "./storage-managers/cloud"
 import { LocalStorage } from "./storage-managers/local-storage"
 
@@ -29,8 +30,9 @@ const main = async () => {
         const intoleranciaSource = new DiarioSource(earliestDate)
         const sintesisSource = new SintesisSource(earliestDate)
         const pueblaOnlineSource = new PueblaOnlineSource(browser, earliestDate)
+        const solSource = new SolSource(browser, earliestDate)
 
-        const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource]
+        const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource, solSource]
         
         const application = new Application(
             "debug", // debug mode on to log expected errors
