@@ -16,15 +16,14 @@ import { Researcher } from "./researcher/researcher"
 import { LocalStorage } from "./storage-managers/local-storage"
 
 const main = async () => {
-    // Initialize shared browser instance for sources that need it
     const browser = await chromium.launch({ headless: true })
     
     try {
         const agent = new Agent()
         const newsEditor = new NewsEditor(agent)
+
         //const localFiles = new LocalStorage()
         const cloudFiles = new Cloud() 
-
         const publisher = new Publisher([cloudFiles])
 
         const earliestDate = new Date()
@@ -32,24 +31,19 @@ const main = async () => {
         const sintesisSource = new SintesisSource(earliestDate)
         const pueblaOnlineSource = new PueblaOnlineSource(browser, earliestDate)
         const solSource = new SolSource(browser, earliestDate)
-
         const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource, solSource]
-
         const researcher = new Researcher(sources, new DSL())
         
         const application = new Application(
-            "production", // debug mode on to log expected errors
+            "production",
             agent, 
             newsEditor, 
             publisher,
             researcher
         )
 
-        console.log("--------------------Start------------------------------------------")
         await application.run()
-        console.log("--------------------End------------------------------------------")
     } finally {
-        // Always clean up browser, even if an error occurs
         await browser.close()
     }
 }

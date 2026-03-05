@@ -57,6 +57,7 @@ export class Application {
     }
 
     run = async () => {
+        console.log("--------------------Start------------------------------------------")
         console.log("Fetching article URLs from sources...")
         const articlesInfo = await this.researcher.gatherEvents()
         console.log("Organizing into unique titles")
@@ -79,5 +80,6 @@ export class Application {
         })
 
         this.logResults()
+        console.log("--------------------End------------------------------------------")
     }
 }
