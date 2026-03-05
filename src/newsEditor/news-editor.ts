@@ -24,7 +24,14 @@ export class NewsEditor {
     }
 
     private draftUnionArticle = async (uploadArticleInput: ProcessUnionArticleInput): AttemptToFetch<DraftArticle> => {
-        const {contents, urls, relevantPersons } =  uploadArticleInput
+        const {contents, urls, relevantPersons, sources } =  uploadArticleInput
+
+        if(sources.size > 1){
+            //this is a good thing
+            console.log("**********")
+            console.log(`Building a union article from multiple sources: ${[...sources].join(", ")}`)
+            console.log("**********")
+        }
 
         const factsAttempts = await Promise.all(contents.map(async (content) => this.agent.extractFacts(content, relevantPersons)))
 

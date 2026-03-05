@@ -1,4 +1,4 @@
-import { ArticleIdentifier, ArticleTitle, RawArticlePayload } from "../symbols/entities";
+import { ArticleIdentifier, NewsEvent, RawArticlePayload } from "../symbols/entities";
 import { AttemptToFetch } from "../symbols/functors";
         
 export interface NewsSource {
@@ -6,6 +6,6 @@ export interface NewsSource {
     readonly earliestDate: Date;
 
     requiresSequential?: boolean;
-    getTitles(): AttemptToFetch<{titles: ArticleTitle[]}>
+    getTitles(): AttemptToFetch<{titles: NewsEvent[]}>
     fetchArticle(articleInfo: ArticleIdentifier): AttemptToFetch<RawArticlePayload>
 }

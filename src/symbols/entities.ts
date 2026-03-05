@@ -3,19 +3,21 @@ import { Attempt } from "./functors"
 
 export type AppMode = "production" | "debug"
 
-export type ArticleTitle = {
+export type NewsEvent = {
     url: string,
     title: string
 }
 
 export type SourceName = string
 
-export type ArticlesInfo = Record<SourceName, ArticleTitle[]>
+export type NewsEvents = Record<SourceName, NewsEvent[]>
 
 export type UniqueTitle = {
     source: string,
     title: string
 }
+
+export type Investigation = {stories: SourcedArticlePayload[], errors: GeneralError[]}
 
 export type PonderedTitle = {embedding: number[], title: UniqueTitle}
 export type PonderedTitles = PonderedTitle[]
@@ -39,19 +41,27 @@ export type RawArticlePayload = {
     relevantPersons?: string[]
 }
 
-export type FetchArticleAttempt = Attempt<RawArticlePayload, GeneralError>
+export type SourcedArticlePayload = {
+    content: string,
+    url: string, //just to attach at the end, the call has been made already
+    relevantPersons?: string[]
+    source: SourceName
+}
 
-export type UnionArticlePayload = RawArticlePayload[]
+export type FetchArticleAttempt = Attempt<SourcedArticlePayload, GeneralError>
+
+export type UnionArticlePayload = SourcedArticlePayload[]
 
 export type ProcessSingleArticleInput = {
     type: "single",
-    content: string,
+    content: string,        
     url: string,
     relevantPersons?: string[]
 }
 
 export type ProcessUnionArticleInput = {
-    type: "union",
+    type: "union",  
+    sources: Set<SourceName>, //just for logging and error parsing purposes
     contents: string[],
     urls: string[],
     relevantPersons?: string[]

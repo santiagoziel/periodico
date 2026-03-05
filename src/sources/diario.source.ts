@@ -1,5 +1,5 @@
 import { VIPs } from "../symbols/constants";
-import { ArticleIdentifier, ArticleTitle } from "../symbols/entities";
+import { ArticleIdentifier, NewsEvent } from "../symbols/entities";
 import { knownError, unknownError } from "../symbols/error-models";
 import { failure, success } from "../symbols/functors";
 import { NewsSource } from "./source-interface";
@@ -10,7 +10,7 @@ export class DiarioSource implements NewsSource {
 
     constructor(public readonly earliestDate: Date) {}
 
-    private removeNonRelevanttTitles = (titles: ArticleTitle[]) => {
+    private removeNonRelevanttTitles = (titles: NewsEvent[]) => {
         const earliestDateStr = new Intl.DateTimeFormat('en-CA', {
             timeZone: 'America/Mexico_City',
             year: 'numeric',
@@ -37,7 +37,7 @@ export class DiarioSource implements NewsSource {
 
         const $ = cheerio.load(policySectionHtml);
 
-        const policyLinks: ArticleTitle[] = [];
+        const policyLinks: NewsEvent[] = [];
         const baseUrl = "https://intoleranciadiario.com";
 
         // Find all article links - looking for links within article cards/items

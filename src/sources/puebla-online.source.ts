@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import { Browser } from "playwright";
-import { ArticleIdentifier, ArticleTitle } from "../symbols/entities";
+import { ArticleIdentifier, NewsEvent } from "../symbols/entities";
 import { expectedError, knownError, unknownError } from "../symbols/error-models";
 import { failure, success } from "../symbols/functors";
 import { NewsSource } from "./source-interface";
@@ -45,7 +45,7 @@ export class PueblaOnlineSource implements NewsSource {
             const html = await page.content();
             const $ = cheerio.load(html);
 
-            const articles: ArticleTitle[] = [];
+            const articles: NewsEvent[] = [];
             const baseUrl = "https://www.pueblaonline.com.mx";
 
             // Find all article links - Puebla Online uses links within article titles/cards
@@ -85,10 +85,7 @@ export class PueblaOnlineSource implements NewsSource {
         try {
             const page = await context.newPage();
             
-            console.log(`Navigating to ${articleInfo.url}...`);
             await page.goto(articleInfo.url, { waitUntil: 'networkidle' });
-            
-            console.log(`Page loaded successfully`);
         
             const html = await page.content();
             const $ = cheerio.load(html);

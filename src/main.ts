@@ -12,6 +12,7 @@ import { PueblaOnlineSource } from "./sources/puebla-online.source"
 import { SintesisSource } from "./sources/sintesis.source"
 import { SolSource } from "./sources/sol.source"
 import { Cloud } from "./storage-managers/cloud"
+import { Researcher } from "./researcher/researcher"
 import { LocalStorage } from "./storage-managers/local-storage"
 
 const main = async () => {
@@ -21,10 +22,10 @@ const main = async () => {
     try {
         const agent = new Agent()
         const newsEditor = new NewsEditor(agent)
-        const localFiles = new LocalStorage()
+        //const localFiles = new LocalStorage()
         const cloudFiles = new Cloud() 
 
-        const publisher = new Publisher([localFiles, cloudFiles])
+        const publisher = new Publisher([cloudFiles])
 
         const earliestDate = new Date()
         const intoleranciaSource = new DiarioSource(earliestDate)
@@ -33,14 +34,15 @@ const main = async () => {
         const solSource = new SolSource(browser, earliestDate)
 
         const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource, solSource]
+
+        const researcher = new Researcher(sources, new DSL())
         
         const application = new Application(
-            "debug", // debug mode on to log expected errors
-            sources,
-            new DSL(), 
+            "production", // debug mode on to log expected errors
             agent, 
             newsEditor, 
-            publisher
+            publisher,
+            researcher
         )
 
         console.log("--------------------Start------------------------------------------")
