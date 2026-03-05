@@ -4,7 +4,7 @@ import { Publisher } from "../publisher/publisher";
 import { Researcher } from "../researcher/researcher";
 import { AppMode, ProcessArticleInput, PublishReadyArticle, NewsEvents, UniqueTitle, NewsEvent } from "../symbols/entities";
 import { GeneralError } from "../symbols/error-models";
-import { buildSuccessFrom, resolveThe } from "../symbols/functors";
+import { failedThe, resolveThe, payloadFromTheFailed } from "../symbols/functors";
 import { DSL } from "./dsl";
 
 export class Application {
@@ -73,7 +73,9 @@ export class Application {
         this.fetchErrors.push(...sourcedNews.errors)
 
         publishResults.forEach((publishResult) => {
-            buildSuccessFrom(publishResult.storageAttempt, (storageError) => this.publishErrors.push(storageError))
+            if(failedThe(publishResult.storageAttempt)) {
+                this.publishErrors.push(payloadFromTheFailed(publishResult.storageAttempt))
+            }
         })
 
         this.logResults()
