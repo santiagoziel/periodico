@@ -36,11 +36,7 @@ export class PueblaOnlineSource implements NewsSource {
 
         try {
             const page = await context.newPage();
-
-            console.log(`Navigating to ${publicacionesSourceLink}...`);
             await page.goto(publicacionesSourceLink, { waitUntil: 'networkidle' });
-
-            console.log(`Page loaded successfully`);
 
             const html = await page.content();
             const $ = cheerio.load(html);

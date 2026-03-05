@@ -48,9 +48,6 @@ export class NewsEditor {
     
     private formatNoteUsingThe = async (sections: NoteSections): Promise<FinalDraftArticle> => {
         const {note, processedTitle: title, urlSection, relevantPersons} = sections
-        console.log("**********")
-        console.log(title)
-        console.log("**********")
         const paragraphSpacing = { spacing: { after: 240 } }; // One line between paragraphs
         const summaryParagraphs = note
             .split("\n")
