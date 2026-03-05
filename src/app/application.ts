@@ -3,7 +3,7 @@ import { NewsEditor } from "../newsEditor/news-editor";
 import { Publisher } from "../publisher/publisher";
 import { Researcher } from "../researcher/researcher";
 import { AppMode, ProcessArticleInput, PublishReadyArticle, NewsEvents, UniqueTitle, NewsEvent } from "../symbols/entities";
-import { GeneralError } from "../symbols/error-models";
+import { GeneralError, weKnowWhatHappenedInThe } from "../symbols/error-models";
 import { failedThe, resolveThe, payloadFromTheFailed } from "../symbols/functors";
 import { DSL } from "./dsl";
 
@@ -71,7 +71,13 @@ export class Application {
         console.log("Publishing drafted news articles")
         const publishResults = await this.publisher.publish(readyToPublishNotes)
 
-        this.fetchErrors.push(...sourcedNews.errors)
+        this.fetchErrors.forEach((error) => {
+            if(weKnowWhatHappenedInThe(error)) {
+                this.expectedErrors.push(error)
+            } else {
+                this.fetchErrors.push(error)
+            }
+        })
 
         publishResults.forEach((publishResult) => {
             if(failedThe(publishResult.storageAttempt)) {
