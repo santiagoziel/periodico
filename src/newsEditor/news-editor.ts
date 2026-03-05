@@ -122,14 +122,14 @@ export class NewsEditor {
         const { facts, type, relevantPersons, urlSection } = draft
 
         const titleNoteFromThe = async (wrappedNote: {note: string}) => {
-            const organizeNoteSections = (wrappedTitle: {suggestedTitle: string}): NoteSections => ({
+            const organizeNoteSectionsWithThe = (wrappedTitle: {suggestedTitle: string}): NoteSections => ({
                 processedTitle: this.cleanString(wrappedTitle.suggestedTitle), 
                 note: wrappedNote.note, 
                 urlSection, 
                 relevantPersons
             })
             const titleAttempt = await this.agent.suggestTitle(wrappedNote.note)
-            return attemptTo(organizeNoteSections, titleAttempt)
+            return attemptTo(organizeNoteSectionsWithThe, titleAttempt)
         }
 
         const buildPublishReadyFrom = (finalDraft: FinalDraftArticle): PublishReadyArticle => {

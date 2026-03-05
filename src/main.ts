@@ -1,7 +1,7 @@
 import { chromium } from "playwright"
 import { Agent } from "./agent/agent"
 import { Application } from "./app/application"
-import { DSL } from "./app/dsl"
+import { DSL } from "./researcher/dsl"
 import { NewsEditor } from "./newsEditor/news-editor"
 import { Publisher } from "./publisher/publisher"
 import { DiarioSource } from "./sources/diario.source"

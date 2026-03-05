@@ -5,7 +5,6 @@ import { Researcher } from "../researcher/researcher";
 import { AppMode, ProcessArticleInput, PublishReadyArticle, NewsEvents, UniqueTitle, NewsEvent } from "../symbols/entities";
 import { GeneralError, weKnowWhatHappenedInThe } from "../symbols/error-models";
 import { failedThe, resolveThe, payloadFromTheFailed } from "../symbols/functors";
-import { DSL } from "./dsl";
 
 export class Application {
     fetchErrors: GeneralError[] = []
