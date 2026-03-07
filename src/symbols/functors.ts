@@ -54,7 +54,7 @@ export const resolveThe = <A extends object, E extends object, R>
         ? onSuccess(payloadFromTheSuccessful(attempt)) 
         : onFailure(payloadFromTheFailed(attempt));
 
-export const buildSuccessPayloadFrom = <A extends object, E extends object>
+export const buildSuccessFrom = <A extends object, E extends object>
 (attempt: Attempt<A, E>, fromFailure: (e: E) => A): A =>
     succeededInThe(attempt) 
         ? payloadFromTheSuccessful(attempt) 

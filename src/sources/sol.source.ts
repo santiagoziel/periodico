@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import { Browser } from "playwright";
-import { ArticleIdentifier, ArticleTitle } from "../symbols/entities";
+import { ArticleIdentifier, NewsEvent } from "../symbols/entities";
 import { expectedError, knownError, unknownError } from "../symbols/error-models";
 import { failure, success } from "../symbols/functors";
 import { NewsSource } from "./source-interface";
@@ -35,7 +35,7 @@ export class SolSource implements NewsSource {
         const $ = cheerio.load(html);
 
         const baseUrl = "https://oem.com.mx";
-        const titles: ArticleTitle[] = [];
+        const titles: NewsEvent[] = [];
 
         $("a[href*='/elsoldepuebla/']").each((_, element) => {
             const $el = $(element);

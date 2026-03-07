@@ -1,4 +1,4 @@
-import { ArticleIdentifier, ArticleTitle, ArticlesInfo, ProcessSingleArticleInput, ProcessUnionArticleInput, RawArticlePayload, UnionArticlePayload, UniqueTitle } from "../symbols/entities"
+import { ArticleIdentifier, NewsEvent, NewsEvents, ProcessSingleArticleInput, ProcessUnionArticleInput, RawArticlePayload, SourcedArticlePayload, UnionArticlePayload, UniqueTitle } from "../symbols/entities"
 import { GeneralError, errorWithContext, theParsedErrorFromThe } from "../symbols/error-models"
 
 export class DSL {
@@ -28,17 +28,17 @@ export class DSL {
         console.log(theParsedErrorFromThe(x, this.logError))
     }
 
-    organizeTitles = (name: string, titles: ArticleTitle[], articlesInfo: ArticlesInfo) => {
+    organizeTitles = (name: string, titles: NewsEvent[], articlesInfo: NewsEvents) => {
         articlesInfo[name] = titles.map((articleTitle) => ({...articleTitle, title: articleTitle.title}))
     }
 
-    flattenArticleTitles = (articlesInfo: ArticlesInfo): UniqueTitle[] => {
-        return (Object.entries(articlesInfo) as [string, ArticleTitle[]][]).map(([sourceName, titles]) => 
+    organizeReports = (articlesInfo: NewsEvents): UniqueTitle[] => {
+        return (Object.entries(articlesInfo) as [string, NewsEvent[]][]).map(([sourceName, titles]) => 
             titles.map(articleTitle => ({source: sourceName, title: articleTitle.title}))
         ).flat()
     }
 
-    buildArticleId = (articleInfo: ArticlesInfo, title: UniqueTitle): ArticleIdentifier => {
+    buildArticleId = (articleInfo: NewsEvents, title: UniqueTitle): ArticleIdentifier => {
         const sourceArticles = articleInfo[title.source]
         const sourceArticle = sourceArticles.find(article => article.title === title.title)
         if (!sourceArticle) {
@@ -55,18 +55,23 @@ export class DSL {
         const facts = rawPayloads.map(payload => payload.content)
         const urls = rawPayloads.map(payload => payload.url)
         const relevantPersons = rawPayloads.flatMap(payload => payload.relevantPersons ?? [])
+        const sources = new Set(rawPayloads.map(payload => payload.source))
         return {
             type: "union", 
             contents: facts,
+            sources,
             urls, 
             ...(relevantPersons.length > 0 ? { relevantPersons } : {})
         }
     }
 
-    buildSingleUploadPayload = (rawPayload: RawArticlePayload): ProcessSingleArticleInput => {
+    buildSingleUploadPayload = (rawPayload: SourcedArticlePayload): ProcessSingleArticleInput => {
         return {
             type: "single",
-            ...rawPayload
+            source: rawPayload.source,
+            content: rawPayload.content,
+            url: rawPayload.url,
+            ...(rawPayload.relevantPersons ? { relevantPersons: rawPayload.relevantPersons } : {})
         }
     }
 }

@@ -81,7 +81,7 @@ export class Agent {
                         const similarity = this.cosineSimilarity(PonderedTitles[nearMatchIndex].embedding, groupSample.embedding)
                         return similarity > MAIN_THRESHOLD
                     })
-                    if(fits) {
+                    if(fits && !groupedIndexes.has(nearMatchIndex)) {
                         groupsByAnchor[Number(anchorIndex)].push(PonderedTitles[nearMatchIndex])
                         groupedIndexes.add(nearMatchIndex)
                     }
