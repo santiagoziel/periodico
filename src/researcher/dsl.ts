@@ -1,4 +1,4 @@
-import { ArticleIdentifier, NewsEvent, NewsEvents, ProcessSingleArticleInput, ProcessUnionArticleInput, RawArticlePayload, UnionArticlePayload, UniqueTitle } from "../symbols/entities"
+import { ArticleIdentifier, NewsEvent, NewsEvents, ProcessSingleArticleInput, ProcessUnionArticleInput, RawArticlePayload, SourcedArticlePayload, UnionArticlePayload, UniqueTitle } from "../symbols/entities"
 import { GeneralError, errorWithContext, theParsedErrorFromThe } from "../symbols/error-models"
 
 export class DSL {
@@ -65,10 +65,13 @@ export class DSL {
         }
     }
 
-    buildSingleUploadPayload = (rawPayload: RawArticlePayload): ProcessSingleArticleInput => {
+    buildSingleUploadPayload = (rawPayload: SourcedArticlePayload): ProcessSingleArticleInput => {
         return {
             type: "single",
-            ...rawPayload
+            source: rawPayload.source,
+            content: rawPayload.content,
+            url: rawPayload.url,
+            ...(rawPayload.relevantPersons ? { relevantPersons: rawPayload.relevantPersons } : {})
         }
     }
 }

@@ -54,7 +54,8 @@ export type UnionArticlePayload = SourcedArticlePayload[]
 
 export type ProcessSingleArticleInput = {
     type: "single",
-    content: string,        
+    source: SourceName,
+    content: string,
     url: string,
     relevantPersons?: string[]
 }

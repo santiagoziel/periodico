@@ -2,7 +2,7 @@ import { Agent } from "../agent/agent";
 import { NewsEditor } from "../newsEditor/news-editor";
 import { Publisher } from "../publisher/publisher";
 import { Researcher } from "../researcher/researcher";
-import { AppMode, ProcessArticleInput, PublishReadyArticle, NewsEvents, UniqueTitle, NewsEvent } from "../symbols/entities";
+import { AppMode, ProcessArticleInput, PublishReadyArticle, NewsEvents, UniqueTitle, NewsEvent, SourceName } from "../symbols/entities";
 import { GeneralError, weKnowWhatHappenedInThe } from "../symbols/error-models";
 import { failedThe, resolveThe, payloadFromTheFailed } from "../symbols/functors";
 
@@ -27,19 +27,39 @@ export class Application {
         }
 
  
-    private writeNews = async (sourcedNews: ProcessArticleInput[]): Promise<PublishReadyArticle[]> => {
-        const articlesAttempts = await Promise.all(sourcedNews.map((sourcedReport) => this.newsEditor.editArticle(sourcedReport)))
+    private sourcesFrom = (article: ProcessArticleInput): SourceName[] =>
+        article.type === "single" ? [article.source] : [...article.sources]
 
-        return articlesAttempts.reduce<PublishReadyArticle[]>((acc, articleAttempt) => {
-            resolveThe(articleAttempt,
-                (article) => acc.push(article),
+    private writeNews = async (sourcedNews: ProcessArticleInput[]): Promise<{article: PublishReadyArticle, sources: SourceName[]}[]> => {
+        const articlesAttempts = await Promise.all(sourcedNews.map(async (sourcedReport) => ({
+            attempt: await this.newsEditor.editArticle(sourcedReport),
+            sources: this.sourcesFrom(sourcedReport)
+        })))
+
+        return articlesAttempts.reduce<{article: PublishReadyArticle, sources: SourceName[]}[]>((acc, {attempt, sources}) => {
+            resolveThe(attempt,
+                (article) => acc.push({article, sources}),
                 (articleError) => this.redactErrors.push(articleError)
             )
             return acc
         }, [])
     }
 
-    private logResults = () => {
+    private countPublishedSources = (
+        writtenArticles: {article: PublishReadyArticle, sources: SourceName[]}[],
+        failedTitles: Set<string>
+    ): Record<SourceName, number> => {
+        const counts: Record<SourceName, number> = {}
+        for (const {article, sources} of writtenArticles) {
+            if (failedTitles.has(article.processedTitle)) continue
+            for (const source of sources) {
+                counts[source] = (counts[source] ?? 0) + 1
+            }
+        }
+        return counts
+    }
+
+    private logResults = (sourceCounts: Record<SourceName, number>) => {
         const weHadAnError = this.fetchErrors.length > 0 || this.redactErrors.length > 0 || this.publishErrors.length > 0
 
         if(weHadAnError) {
@@ -48,6 +68,16 @@ export class Application {
             console.log("Publish errors: " + JSON.stringify(this.publishErrors, null, 2))
         } else {
             console.log("Successfully published all articles!!")
+        }
+
+        const sourceEntries = Object.entries(sourceCounts)
+        if (sourceEntries.length > 0) {
+            console.log("Published articles per source:")
+            for (const [source, count] of sourceEntries) {
+                console.log(`  ${source}: ${count}`)
+            }
+        } else {
+            console.log("No articles were published from any source.")
         }
 
         if(this.mode === "debug") {
@@ -66,7 +96,8 @@ export class Application {
         console.log("Fetching news content from sources, grouped by similarity")
         const sourcedNews = await this.researcher.fetchNews(articlesInfo, articleGroups)
         console.log("Drafting news articles using the agent and the news editor")
-        const readyToPublishNotes = await this.writeNews(sourcedNews.articles)
+        const writtenArticles = await this.writeNews(sourcedNews.articles)
+        const readyToPublishNotes = writtenArticles.map(w => w.article)
         console.log("Publishing drafted news articles")
         const publishResults = await this.publisher.publish(readyToPublishNotes)
 
@@ -78,13 +109,16 @@ export class Application {
             }
         })
 
+        const failedTitles = new Set<string>()
         publishResults.forEach((publishResult) => {
             if(failedThe(publishResult.storageAttempt)) {
                 this.publishErrors.push(payloadFromTheFailed(publishResult.storageAttempt))
+                failedTitles.add(publishResult.article)
             }
         })
 
-        this.logResults()
+        const sourceCounts = this.countPublishedSources(writtenArticles, failedTitles)
+        this.logResults(sourceCounts)
         console.log("--------------------End------------------------------------------")
     }
 }
