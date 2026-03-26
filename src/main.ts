@@ -15,6 +15,8 @@ import { SolSource } from "./sources/sol.source"
 import { Cloud } from "./storage-managers/cloud"
 import { Researcher } from "./researcher/researcher"
 import { LocalStorage } from "./storage-managers/local-storage"
+import { HorasSource } from "./sources/horas.source"
+import { DesdePueblaSource } from "./sources/desde-puebla.source"
 
 const main = async () => {
     const browser = await chromium.launch({ headless: true })
@@ -23,9 +25,9 @@ const main = async () => {
         const agent = new Agent()
         const newsEditor = new NewsEditor(agent)
 
-        //const localFiles = new LocalStorage()
+        const localFiles = new LocalStorage()
         const cloudFiles = new Cloud() 
-        const publisher = new Publisher([cloudFiles])
+        const publisher = new Publisher([localFiles, cloudFiles])
 
         const earliestDate = new Date()
         const intoleranciaSource = new DiarioSource(earliestDate)
@@ -33,7 +35,9 @@ const main = async () => {
         const pueblaOnlineSource = new PueblaOnlineSource(browser, earliestDate)
         const solSource = new SolSource(browser, earliestDate)
         const milenioSource = new MilenioSource(earliestDate)
-        const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource, solSource, milenioSource]
+        const desdePueblaSource = new DesdePueblaSource(earliestDate)
+        const horasSource = new HorasSource(earliestDate)
+        const sources = [intoleranciaSource, sintesisSource, pueblaOnlineSource, solSource, milenioSource, desdePueblaSource, horasSource]
         const researcher = new Researcher(sources, new DSL())
         
         const application = new Application(
